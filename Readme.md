@@ -8,10 +8,16 @@ gcloud auth login
 
 # Git:
 
-[https://github.com/orichaud/gce](https://github.com/orichaud/gce)
+* [https://github.com/orichaud/gce.git](https://github.com/orichaud/gce.git)
 
 ``` sh
 git init
+git add .
+git commit -m "initialization"
+git remote add origin https://github.com/orichaud/gce.git
+git remote -v
+git push origin master
+
 ```
 
 # Creating a VM formation

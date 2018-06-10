@@ -37,9 +37,13 @@ CONFIRM
     echo "+ deploy: deploy into cluster $CLUSTER"
     shift
 
-    kubectl run hello-server --image gcr.io/google-samples/hello-app:1.0 --port 8080
-    kubectl expose deployment hello-server --type "LoadBalancer"
-    kubectl get service hello-server
+ #   kubectl run hello-server --image gcr.io/google-samples/hello-app:1.0 --port 8080
+ #   kubectl expose deployment hello-server --type "LoadBalancer"
+ #   kubectl get service hello-server
+
+    kubectl create -f counter-deployment.yaml
+    kubectl create -f counter-hpa.yaml  
+    kubectl create -f counter-pdb.yaml 
 
     echo "+ deploy: finished"
     ;;
@@ -48,7 +52,7 @@ CONFIRM
     echo "+ undeploy: undeploy into cluster $CLUSTER"
     shift
 
-    kubectl delete deployment hello-server
+    kubectl delete -f counter-deployment.yaml
 
     echo "+ undeploy: finished"
     ;;
@@ -57,11 +61,19 @@ CONFIRM
     echo "+ test: invoking hello-server service"
     shift
     
-    ip=`kubectl get service hello-server -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'`
-    port=`kubectl get service hello-server -o=jsonpath='{.spec.ports[0].port}'`
+    ip=`kubectl get service counter -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'`
+    port=`kubectl get service counter -o=jsonpath='{.spec.ports[0].port}'`
+
+    while [[ ! -z $ip || ! -z $port ]]
+    do
+        echo "Waiting for endpoint to be ready"
+        sleep 5
+
+        ip=`kubectl get service hello-server -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'`
+        port=`kubectl get service hello-server -o=jsonpath='{.spec.ports[0].port}'`
+    done
     
-    url="http://$ip:$port"
-    echo "+ invoking $url"
+   
 
     curl $url
     ;;

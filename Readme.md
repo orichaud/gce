@@ -43,7 +43,7 @@ Once the image is available in GCR, you can go to the next step, and start the e
 ```sh
 ./gke_admin.sh --deploy
 ```
- Second option is with CLI options. This will first create a deployment, scale the number of replicas, asssociate an autoscaler and finally create a Load Balancer directly accessilble on the public Internet. No POD Disruption Budget is defined.
+* Second option is with CLI options. This will first create a deployment, scale the number of replicas, asssociate an autoscaler and finally create a Load Balancer directly accessilble on the public Internet. No POD Disruption Budget is defined.
  ```sh
 ./gke_admin.sh --deploy-CLI
 ```

@@ -1,17 +1,14 @@
 # Google Cloud Account
 We assume you have installed [gcloud]( https://cloud.google.com/sdk/) and [kubectl]( https://kubernetes.io/docs/tasks/tools/install-kubectl/).
 
-To initialize the environemnt and connect to your google account, you will run the following commands. It assumes you have a GCP account and that you have defined default project, your region/zone (you can refer to this [page](https://cloud.google.com/kubernetes-engine/docs/quickstart)):
-```sh
-gcloud config set project myProject
-# e.g.: europe-west1-b can be a zone, see the list of zones defined by GCP
-gcloud config set compute/zone myzone 
-```
-
-
+To initialize the environment and connect to your google account, you will run the following commands. It assumes you have a GCP account:
 ``` sh
 gcloud init
 gcloud auth login
+```
+and that you have defined default project (you can refer to this [page](https://cloud.google.com/kubernetes-engine/docs/quickstart)):
+```sh
+gcloud config set project myProject
 ```
 Then, you can define the regions you want to use and select a default one:
 ```sh

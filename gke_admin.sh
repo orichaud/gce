@@ -73,9 +73,9 @@ CONFIRM
     echo "+ undeploy: undeploy with CLI fom cluster $CLUSTER"
     shift
 
-    kubectl delete deployment counter
-    kubectl delete service counter
-    kubectl delete hpacounter
+    kubectl delete deployment counter-deployment
+    kubectl delete service counter-deployment
+    kubectl delete apps counter-deployement
     
     echo "+ undeploy: finished"
     ;;

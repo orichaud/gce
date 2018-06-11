@@ -23,7 +23,7 @@ In case you want to access and contribute:
 * [https://github.com/orichaud/gce.git](https://github.com/orichaud/gce.git)
 
 
-# Initialization the GKE cluster
+# Initialization of the GKE cluster
 To deploy the cluster, you will call the predefined script:
 ``` sh
 ./gke_admin.sh --create-cluster

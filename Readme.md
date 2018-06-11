@@ -1,5 +1,14 @@
-# Google Cloud Account
-We assume you have installed [gcloud]( https://cloud.google.com/sdk/) and [kubectl]( https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+# Objective
+This is a simple tutorial including some advacned concepts like autoscaler and POD disruption budget for those wnting to start with Google Cloud and Kunbernetes. It ias based on a simple GO program. 
+
+# Prequisites
+We assume you have installed:
+* [gcloud]( https://cloud.google.com/sdk/)
+* [kubectl]( https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+* [Docker](https://docs.docker.com/install/). In particular for Docker, a local registry must be run and it will be used to push images to Google Container Repository.  
+
+# Google Cloud account set up
+
 
 To initialize the environment and connect to your google account, you will run the following commands. It assumes you have a GCP account:
 ``` sh

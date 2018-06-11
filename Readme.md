@@ -85,6 +85,7 @@ NAME              TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)        
 counter-service   LoadBalancer   10.27.241.241   35.233.100.85   8080:30000/TCP   1m
 kubernetes        ClusterIP      10.27.240.1     <none>          443/TCP          8h
 ```
+The script will not check the availability of the EXTERNAL-IP.
 You can run the test:
 ```sh
 ./gke_admin.sh --test

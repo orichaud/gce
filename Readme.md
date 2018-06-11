@@ -1,5 +1,7 @@
 # Objective
-This is a simple tutorial including some advacned concepts like autoscaler and POD disruption budget for those wnting to start with Google Cloud and Kubernetes. It ias based on a simple GO program. 
+This is a simple tutorial including some advanced concepts like autoscaler and POD disruption budget for those wnting to start with Google Cloud and Kubernetes. It ias based on a simple GO program. 
+
+You can simply clone this project and follow the instructions defined in this page.
 
 # Prequisites
 We assume you have installed:

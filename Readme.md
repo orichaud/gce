@@ -74,4 +74,13 @@ NAME              TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)        
 counter-service   LoadBalancer   10.27.241.241   35.233.100.85   8080:30000/TCP   1m
 kubernetes        ClusterIP      10.27.240.1     <none>          443/TCP          8h
 ```
-
+You can run the test:
+```sh
+./gke_admin.sh --test
+```
+whose output is:
+```sh
++ test: invoking service
+URL: http://http://35.233.100.85:8080/
+{"Status":"OK","Response":"counter-deployment-86699789d4-wq8hb - counter=1"}# done
+```

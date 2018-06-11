@@ -1,11 +1,12 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: my-service
+  name: counter-service
 spec:
   selector:
-    app: MyApp
+    app: counter
   ports:
   - protocol: TCP
-    port: 80
-    targetPort: 9376
+    port: 8080
+    targetPort: 8080
+  type: LoadBalancer

@@ -47,3 +47,4 @@ Once the image is available in GCR, you can go to the next step, and start the e
  ```sh
 ./gke_admin.sh --deploy-CLI
 ```
+The CLI options are limited. The YAML offers much more possibilities to configure the Kubernetes objects. 

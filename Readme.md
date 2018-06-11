@@ -1,11 +1,11 @@
 # Objective
-This is a simple tutorial including some advacned concepts like autoscaler and POD disruption budget for those wnting to start with Google Cloud and Kunbernetes. It ias based on a simple GO program. 
+This is a simple tutorial including some advacned concepts like autoscaler and POD disruption budget for those wnting to start with Google Cloud and Kubernetes. It ias based on a simple GO program. 
 
 # Prequisites
 We assume you have installed:
 * [gcloud]( https://cloud.google.com/sdk/)
 * [kubectl]( https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-* [Docker](https://docs.docker.com/install/). In particular for Docker, a local registry must be run and it will be used to push images to Google Container Repository.  
+* [Docker](https://docs.docker.com/install/): In particular, a local registry must be run and it will be used to push images to Google Container Repository.
 
 # Google Cloud account set up
 
@@ -48,11 +48,11 @@ The result is the creation of a GKE cluster belonging to your default project as
 ```
 # Building and deploying the docker image
 You can go to the second set which is the full depployment of a simple GO program incrementing a counter. 
-You must first compile: 
+You must first compile. The script will build for MacOS and for Linux. The Linux version will be used to create the Docker image:
 ```sh 
 make build
 ```
-You can build the docker image and push the image to the Google Container Respository. This is the latest version of the image that will be picked up by Kubernetes to schedule the deployment of your POD.
+You can build the docker image and push the image to the Google Container Respository. This is the latest version of the image that will be picked up by Kubernetes to schedule the deployment of your POD. The base image is based on the latest Golang image:
 ```sh
 make docker
 ```

@@ -28,7 +28,12 @@ To deploy the cluster, you will call the predefined script:
 ``` sh
 ./gke_admin.sh --create-cluster
 ```
-The result is the creation of a GKE cluster belonging to your default project as defined previously.
+The result is the creation of a GKE cluster belonging to your default project as defined previously. To delete your cluster:
+``` sh
+./gke_admin.sh --delete-cluster
+```
+
+
 Then you can go to the second set which is the full depployment of a simple GO program incrementing a counter. 
 You must first compile: 
 ```sh 
@@ -38,13 +43,21 @@ And then you can build the docker image and push the image to the Google Contain
 ```sh
 make docker
 ```
-Once the image is available in GCR, you can go to the next step, and start the effective deploymenf of your cluster. I have create to options:
+Once the image is available in GCR, you can go to the next step, and start the effective deploymenf of your cluster. 2 options are available:
 * First option is with descriptors. This will first create a deployment, asssociate an autoscaler and a POD disruption budget and finally create a Load Balancer directly accessilble on the public Internet.
 ```sh
 ./gke_admin.sh --deploy
+```
+Then to dismantle:
+```sh
+./gke_admin.sh --undeploy
 ```
 * Second option is with CLI options. This will first create a deployment, scale the number of replicas, asssociate an autoscaler and finally create a Load Balancer directly accessilble on the public Internet. No POD Disruption Budget is defined.
  ```sh
 ./gke_admin.sh --deploy-CLI
 ```
-The CLI options are limited. The YAML offers much more possibilities to configure the Kubernetes objects. 
+Then to dismantle:
+```sh
+./gke_admin.sh --undeploy-CLI
+```
+The CLI options are limited. The YAML offers much more possibilities to configure the Kubernetes objects.

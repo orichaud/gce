@@ -34,12 +34,8 @@ CONFIRM
     ;;
 
     --deploy)
-    echo "+ deploy: deploy into cluster $CLUSTER"
+    echo "+ deploy: deploy with descriptors into cluster $CLUSTER"
     shift
-
-   # kubectl run counter --image gcr.io/google-samples/hserver --port 8080
-   # kubectl expose deployment counter --type "LoadBalancer"
-   # kubectl get service counter
 
     kubectl create -f counter-deployment.yaml
     kubectl create -f counter-hpa.yaml  
@@ -50,13 +46,36 @@ CONFIRM
     ;;
 
     --undeploy)
-    echo "+ undeploy: undeploy into cluster $CLUSTER"
+    echo "+ undeploy: undeploy with descriptors from cluster $CLUSTER"
     shift
 
     kubectl delete -f counter-service.yaml 
     kubectl delete -f counter-deployment.yaml
     kubectl delete -f counter-hpa.yaml  
     kubectl delete -f counter-pdb.yaml 
+    
+    echo "+ undeploy: finished"
+    ;;
+
+     --deploy-CLI)
+    echo "+ deploy: deploy with CLI into cluster $CLUSTER"
+    shift
+
+    kubectl create deployment counter-deployment --image gcr.io/google-samples/hserver --port 8080
+    kubectl scale deployment counter-deployment --replicas=3
+    kubectl autoscale deployment counter-deployment --min=3 --max=10
+    kubectl expose deployment counter-deployment --type "LoadBalancer"  --port=8080 --target-port=8080
+
+    echo "+ deploy: finished"
+    ;;
+
+    --undeploy-CLI)
+    echo "+ undeploy: undeploy with CLI fom cluster $CLUSTER"
+    shift
+
+    kubectl delete deployment counter
+    kubectl delete service counter
+    kubectl delete hpacounter
     
     echo "+ undeploy: finished"
     ;;

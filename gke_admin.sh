@@ -1,6 +1,7 @@
 #!/bin/sh
 
 CLUSTER=or-cluster
+NS=orns
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -36,11 +37,11 @@ CONFIRM
     --deploy)
     echo "+ deploy: deploy with descriptors into cluster $CLUSTER"
     shift
-
-    kubectl create -f counter-deployment.yaml
-    kubectl create -f counter-hpa.yaml  
-    kubectl create -f counter-pdb.yaml 
-    kubectl create -f counter-service.yaml 
+    kubectl create namespace $NS
+    kubectl create -f counter-deployment.yaml --namespace=$NS
+    kubectl create -f counter-hpa.yaml --namespace=$NS  
+    kubectl create -f counter-pdb.yaml --namespace=$NS
+    kubectl create -f counter-service.yaml --namespace=$NS
     
     echo "+ deploy: finished"
     ;;
@@ -49,10 +50,11 @@ CONFIRM
     echo "+ undeploy: undeploy with descriptors from cluster $CLUSTER"
     shift
 
-    kubectl delete -f counter-service.yaml 
-    kubectl delete -f counter-deployment.yaml
-    kubectl delete -f counter-hpa.yaml  
-    kubectl delete -f counter-pdb.yaml 
+    kubectl delete -f counter-service.yaml --namespace=$NS
+    kubectl delete -f counter-deployment.yaml --namespace=$NS
+    kubectl delete -f counter-hpa.yaml --namespace=$NS
+    kubectl delete -f counter-pdb.yaml --namespace=$NS
+    kubectl create delete $NS
     
     echo "+ undeploy: finished"
     ;;
@@ -61,10 +63,11 @@ CONFIRM
     echo "+ deploy: deploy with CLI into cluster $CLUSTER"
     shift
 
-    kubectl create deployment counter-deployment --image gcr.io/google-samples/hserver --port 8080
-    kubectl scale deployment counter-deployment --replicas=3
-    kubectl autoscale deployment counter-deployment --min=3 --max=10
-    kubectl expose deployment counter-deployment --type "LoadBalancer"  --port=8080 --target-port=8080
+    kubectl create namespace $NS
+    kubectl create deployment counter-deployment --image gcr.io/google-samples/hserver --namespace=$NS
+    kubectl scale deployment counter-deployment --replicas=3 --namespace=$NS
+    kubectl autoscale deployment counter-deployment --min=3 --max=10 --namespace=$NS
+    kubectl expose deployment counter-deployment --type "LoadBalancer"  --port=8080 --target-port=8080 --namespace=$NS
 
     echo "+ deploy: finished"
     ;;
@@ -73,10 +76,10 @@ CONFIRM
     echo "+ undeploy: undeploy with CLI fom cluster $CLUSTER"
     shift
 
-    kubectl delete deployment counter-deployment
-    kubectl delete service counter-deployment
-    kubectl delete apps counter-deployement
-    
+    kubectl delete deployment counter-deployment --namespace=$NS
+    kubectl delete service counter-deployment --namespace=$NS
+    kubectl delete namespace $NS
+
     echo "+ undeploy: finished"
     ;;
 
@@ -84,8 +87,8 @@ CONFIRM
     echo "+ test: invoking service"
     shift
     
-    ip=`kubectl get service counter-service -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'`
-    port=`kubectl get service counter-service -o=jsonpath='{.spec.ports[0].port}'`
+    ip=`kubectl get service counter-service -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'  --namespace=$NS`
+    port=`kubectl get service counter-service -o=jsonpath='{.spec.ports[0].port}' --namespace=$NS`
 
     url=http://$ip:$port
     echo "URL: http://$url/"

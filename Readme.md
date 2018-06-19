@@ -78,6 +78,11 @@ Then to dismantle:
 ```
 The CLI options are limited. The YAML offers much more possibilities to configure the Kubernetes objects.
 
+In both cases, you can check the objects have been created:
+```sh
+kubectl get deployments,pods,services,hpa --namespace=orns --show-labels
+```
+
 # Testing
 You can check the service with `kubectl get services`. Your service is available for external traffic once the EXTRNAL-IP is defined and not marked as pending:
 ```sh

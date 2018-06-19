@@ -1,5 +1,6 @@
 #!/bin/sh
 
+PROJECT=mp-box-dev
 CLUSTER=or-cluster
 NS=orns
 
@@ -16,8 +17,11 @@ case $key in
     gcloud container clusters create $CLUSTER \
         --preemptible \
         --num-nodes=5 --enable-autoscaling --min-nodes=3 --max-nodes=10 \
+        --machine-type=n1-standard-1 \
         --tags=or-cluster \
         --enable-autorepair --enable-autoupgrade
+
+    kubectl create namespace $NS
 
     echo "+ create: finished"
     ;;
@@ -25,7 +29,7 @@ case $key in
     --delete-cluster)
     echo "+ delete: delete cluster $CLUSTER"
     shift
-
+    kubectl delete namespace $NS
     gcloud container clusters delete $CLUSTER << CONFIRM
     Y
     Y
@@ -37,7 +41,7 @@ CONFIRM
     --deploy)
     echo "+ deploy: deploy with descriptors into cluster $CLUSTER"
     shift
-    kubectl create namespace $NS
+   
     kubectl create -f counter-deployment.yaml --namespace=$NS
     kubectl create -f counter-hpa.yaml --namespace=$NS  
     kubectl create -f counter-pdb.yaml --namespace=$NS
@@ -63,12 +67,16 @@ CONFIRM
     echo "+ deploy: deploy with CLI into cluster $CLUSTER"
     shift
 
-    kubectl create namespace $NS
-    kubectl create deployment counter-deployment --image gcr.io/google-samples/hserver --namespace=$NS
-    kubectl scale deployment counter-deployment --replicas=3 --namespace=$NS
-    kubectl autoscale deployment counter-deployment --min=3 --max=10 --namespace=$NS
-    kubectl expose deployment counter-deployment --type "LoadBalancer"  --port=8080 --target-port=8080 --namespace=$NS
+    OPTS=
 
+    kubectl create deployment counter-deployment $OPTS --image eu.gcr.io/$PROJECT/hserver --namespace=$NS
+    kubectl scale deployment counter-deployment $OPTS --replicas=3 --namespace=$NS
+    kubectl autoscale deployment counter-deployment $OPTS--min=3 --max=10 --namespace=$NS
+    kubectl expose deployment counter-deployment $OPTS --name counter-service --type "LoadBalancer"  --port=8080 --target-port=8080 --namespace=$NS
+    kubectl label deployments counter-deployment $OPTS app=counter version=v2 --overwrite --namespace=$NS
+    kubectl label hpa counter-deployment $OPTS app=counter version=v2 --overwrite --namespace=$NS
+    kubectl label services counter-service $OPTS app=counter version=v2 --overwrite --namespace=$NS
+    
     echo "+ deploy: finished"
     ;;
 
@@ -76,9 +84,7 @@ CONFIRM
     echo "+ undeploy: undeploy with CLI fom cluster $CLUSTER"
     shift
 
-    kubectl delete deployment counter-deployment --namespace=$NS
-    kubectl delete service counter-deployment --namespace=$NS
-    kubectl delete namespace $NS
+    kubectl delete deployments,pods,services,hpa -l app=counter,version=v2 --namespace=$NS
 
     echo "+ undeploy: finished"
     ;;

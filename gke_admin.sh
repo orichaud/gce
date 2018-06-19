@@ -4,6 +4,8 @@ PROJECT=mp-box-dev
 CLUSTER=or-cluster
 NS=orns
 
+OPTS=--namespace=$NS
+
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
@@ -42,10 +44,10 @@ CONFIRM
     echo "+ deploy: deploy with descriptors into cluster $CLUSTER"
     shift
    
-    kubectl create -f counter-deployment.yaml --namespace=$NS
-    kubectl create -f counter-hpa.yaml --namespace=$NS  
-    kubectl create -f counter-pdb.yaml --namespace=$NS
-    kubectl create -f counter-service.yaml --namespace=$NS
+    kubectl create -f counter-deployment.yaml $OPTS
+    kubectl create -f counter-hpa.yaml $OPTS 
+    kubectl create -f counter-pdb.yaml $OPTS
+    kubectl create -f counter-service.yaml $OPTS
     
     echo "+ deploy: finished"
     ;;
@@ -54,11 +56,10 @@ CONFIRM
     echo "+ undeploy: undeploy with descriptors from cluster $CLUSTER"
     shift
 
-    kubectl delete -f counter-service.yaml --namespace=$NS
-    kubectl delete -f counter-deployment.yaml --namespace=$NS
-    kubectl delete -f counter-hpa.yaml --namespace=$NS
-    kubectl delete -f counter-pdb.yaml --namespace=$NS
-    kubectl create delete $NS
+    kubectl delete -f counter-service.yaml $OPTS
+    kubectl delete -f counter-deployment.yaml $OPTS
+    kubectl delete -f counter-hpa.yaml $OPTS
+    kubectl delete -f counter-pdb.yaml $OPTS
     
     echo "+ undeploy: finished"
     ;;
@@ -69,13 +70,13 @@ CONFIRM
 
     OPTS=
 
-    kubectl create deployment counter-deployment $OPTS --image eu.gcr.io/$PROJECT/hserver --namespace=$NS
-    kubectl scale deployment counter-deployment $OPTS --replicas=3 --namespace=$NS
-    kubectl autoscale deployment counter-deployment $OPTS--min=3 --max=10 --namespace=$NS
-    kubectl expose deployment counter-deployment $OPTS --name counter-service --type "LoadBalancer"  --port=8080 --target-port=8080 --namespace=$NS
-    kubectl label deployments counter-deployment $OPTS app=counter version=v2 --overwrite --namespace=$NS
-    kubectl label hpa counter-deployment $OPTS app=counter version=v2 --overwrite --namespace=$NS
-    kubectl label services counter-service $OPTS app=counter version=v2 --overwrite --namespace=$NS
+    kubectl create deployment counter-deployment --image eu.gcr.io/$PROJECT/hserver $OPTS
+    kubectl scale deployment counter-deployment --replicas=3 $OPTS
+    kubectl autoscale deployment counter-deployment--min=3 --max=10 $OPTS
+    kubectl expose deployment counter-deployment --name counter-service --type "LoadBalancer"  --port=8080 --target-port=8080 $OPTS
+    kubectl label deployments counter-deployment app=counter version=v2 --overwrite $OPTS
+    kubectl label hpa counter-deployment app=counter version=v2 --overwrite $OPTS
+    kubectl label services counter-service app=counter version=v2 --overwrite $OPTS
     
     echo "+ deploy: finished"
     ;;
@@ -84,7 +85,7 @@ CONFIRM
     echo "+ undeploy: undeploy with CLI fom cluster $CLUSTER"
     shift
 
-    kubectl delete deployments,pods,services,hpa -l app=counter,version=v2 --namespace=$NS
+    kubectl delete deployments,pods,services,hpa -l app=counter,version=v2 $OPTS
 
     echo "+ undeploy: finished"
     ;;
@@ -93,8 +94,8 @@ CONFIRM
     echo "+ test: invoking service"
     shift
     
-    ip=`kubectl get service counter-service -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'  --namespace=$NS`
-    port=`kubectl get service counter-service -o=jsonpath='{.spec.ports[0].port}' --namespace=$NS`
+    ip=`kubectl get service counter-service -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'  $OPTS`
+    port=`kubectl get service counter-service -o=jsonpath='{.spec.ports[0].port}' $OPTS`
 
     url=http://$ip:$port
     echo "URL: http://$url/"

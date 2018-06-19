@@ -63,10 +63,26 @@ Once the image is available in GCR, you can go to the next step, and start the e
 * First option is with descriptors (see YMAL files defining the various objects). This will first create a deployment object, asssociate an autoscaler, a POD disruption budget and finally create a Load Balancer directly accessilble on the public Internet.
 ```sh
 ./gke_admin.sh --deploy
+
++ deploy: deploy with descriptors into cluster or-cluster
+deployment.extensions "counter-deployment" created
+horizontalpodautoscaler.autoscaling "counter-hpa" created
+poddisruptionbudget.policy "counter-pdb" created
+service "counter-service" created
++ deploy: finished
+# done
 ```
 Then to dismantle:
 ```sh
 ./gke_admin.sh --undeploy
+
++ undeploy: undeploy with descriptors from cluster or-cluster
+service "counter-service" deleted
+deployment.extensions "counter-deployment" deleted
+horizontalpodautoscaler.autoscaling "counter-hpa" deleted
+poddisruptionbudget.policy "counter-pdb" deleted
++ undeploy: finished
+# done
 ```
 * Second option is with CLI options. This will first create a deployment, scale the number of replicas, asssociate an autoscaler and finally create a Load Balancer directly accessilble on the public Internet. No POD Disruption Budget is defined.
  ```sh

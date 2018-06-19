@@ -72,7 +72,7 @@ CONFIRM
 
     kubectl create deployment counter-deployment --image eu.gcr.io/$PROJECT/hserver $OPTS
     kubectl scale deployment counter-deployment --replicas=3 $OPTS
-    kubectl autoscale deployment counter-deployment--min=3 --max=10 $OPTS
+    kubectl autoscale deployment counter-deployment --min=3 --max=10 $OPTS
     kubectl expose deployment counter-deployment --name counter-service --type "LoadBalancer"  --port=8080 --target-port=8080 $OPTS
     kubectl label deployments counter-deployment app=counter version=v2 --overwrite $OPTS
     kubectl label hpa counter-deployment app=counter version=v2 --overwrite $OPTS

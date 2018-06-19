@@ -11,6 +11,8 @@ SRCDIR=./src
 DOCKERFILE=./Dockerfile
 CONTAINER=hserver
 SERVERPORT=8080
+DOCKER_REPO=eu.gcr.io
+PROJECT=mp-box-dev
 
 all: build
 
@@ -22,8 +24,8 @@ build: $(PKG)
 
 docker: $(DOCKERFILE)
 	$(DOCKER) build -t $(CONTAINER) --rm=true $(BASEDIR)
-	$(DOCKER) tag $(CONTAINER) eu.gcr.io/mp-box-dev/$(CONTAINER)
-	$(DOCKER) push eu.gcr.io/mp-box-dev/$(CONTAINER)
+	$(DOCKER) tag $(CONTAINER) $(DOCKER_REPO)/$(PROJECT)/$(CONTAINER)
+	$(DOCKER) push $(DOCKER_REPO)/$(PROJECT)/$(CONTAINER)
 
 clean:
 	- rm -rf $(BINDIR)

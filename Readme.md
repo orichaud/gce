@@ -49,14 +49,14 @@ The result is the creation of a GKE cluster belonging to your default project as
 ./gke_admin.sh --delete-cluster
 ```
 # Building and deploying the docker image
-You can go to the second set which is the full depployment of a simple GO program incrementing a counter. 
-You must first compile. The script will build for MacOS and for Linux. The Linux version will be used to create the Docker image:
+You can go to the second step which is the full depployment of a simple GO program incrementing a counter. The source files can be foudn in `src/main` directory.
+You must first compile the go source file. The script will build for 2 targets: MacOS and for Linux in the `bin` directory. The Linux version will be used to create the Docker image. The `Makefile` will be used:
 ```sh 
 make build
 ```
 You can build the docker image and push the image to the Google Container Respository. This is the latest version of the image that will be picked up by Kubernetes to schedule the deployment of your POD. The base image is based on the latest Golang image:
 ```sh
-make docker
+DOCKER_REPO=eu.gcr.io PROJECT=<My Project> make docker
 ```
 # Deployment on the GKE cluster
 Once the image is available in GCR, you can go to the next step, and start the effective deployment of your cluster. 2 options are available:
@@ -123,7 +123,7 @@ horizontalpodautoscaler.autoscaling/counter-hpa   Deployment/counter-deployment 
 ```
 
 # Testing
-You can check the service with `kubectl get services`. Your service is available for external traffic once the EXTRNAL-IP is defined and not marked as pending:
+You can check the service with `kubectl get services --namespace=orns`. Your service is available for external traffic once the EXTERNAL-IP is defined and not marked as pending:
 ```sh
 NAME              TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)          AGE
 counter-service   LoadBalancer   10.27.241.241   35.233.100.85   8080:30000/TCP   1m

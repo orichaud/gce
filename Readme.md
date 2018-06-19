@@ -78,7 +78,7 @@ Then to dismantle:
 ```
 The CLI options are limited. The YAML offers much more possibilities to configure the Kubernetes objects.
 
-In both cases, you can check the objects have been created:
+In both cases, you can check the objects have been created. For example with the first option, the output shoud look like what follows:
 ```sh
 kubectl get all --namespace=orns --show-labels
 

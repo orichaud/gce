@@ -80,7 +80,30 @@ The CLI options are limited. The YAML offers much more possibilities to configur
 
 In both cases, you can check the objects have been created:
 ```sh
-kubectl get deployments,pods,services,hpa --namespace=orns --show-labels
+kubectl get all --namespace=orns --show-labels
+
+NAME                                      READY     STATUS    RESTARTS   AGE       LABELS
+pod/counter-deployment-86699789d4-8qmtx   1/1       Running   0          38s       app=counter,pod-template-hash=4225534580,version=v2
+pod/counter-deployment-86699789d4-8xgsz   1/1       Running   0          38s       app=counter,pod-template-hash=4225534580,version=v2
+pod/counter-deployment-86699789d4-tpqb9   1/1       Running   0          38s       app=counter,pod-template-hash=4225534580,version=v2
+
+NAME                      TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE       LABELS
+service/counter-service   LoadBalancer   10.27.247.11   <pending>     8080:32030/TCP   36s       <none>
+
+NAME                                       DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       LABELS
+deployment.extensions/counter-deployment   3         3         3            3           38s       app=counter,version=v2
+
+NAME                                                  DESIRED   CURRENT   READY     AGE       LABELS
+replicaset.extensions/counter-deployment-86699789d4   3         3         3         38s       app=counter,pod-template-hash=4225534580,version=v2
+
+NAME                                 DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       LABELS
+deployment.apps/counter-deployment   3         3         3            3           38s       app=counter,version=v2
+
+NAME                                            DESIRED   CURRENT   READY     AGE       LABELS
+replicaset.apps/counter-deployment-86699789d4   3         3         3         38s       app=counter,pod-template-hash=4225534580,version=v2
+
+NAME                                              REFERENCE                       TARGETS         MINPODS   MAXPODS   REPLICAS   AGE       LABELS
+horizontalpodautoscaler.autoscaling/counter-hpa   Deployment/counter-deployment   <unknown>/10%   3         10        0          37s       <none>
 ```
 
 # Testing

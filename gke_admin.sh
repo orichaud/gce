@@ -18,9 +18,10 @@ case $key in
 
     gcloud container clusters create $CLUSTER \
         --preemptible \
-        --num-nodes=5 --enable-autoscaling --min-nodes=3 --max-nodes=10 \
+        --num-nodes=3 --enable-autoscaling --min-nodes=3 --max-nodes=10 \
         --machine-type=n1-standard-1 \
         --tags=or-cluster \
+        --enable-cloud-logging --enable-cloud-monitoring  \
         --enable-autorepair --enable-autoupgrade
 
     kubectl create namespace $NS

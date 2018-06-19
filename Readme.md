@@ -44,7 +44,19 @@ To deploy the cluster and perform operatiosn on the clusters, you will call the 
 ``` sh
 ./gke_admin.sh --create-cluster
 ```
-The result is the creation of a GKE cluster belonging to your default project as defined previously. To delete your cluster:
+The result is the creation of a GKE cluster belonging to your default project as defined previously. You can check the status of your cluster. Plese note that starting from this point, your `kubectl` CLI will point to that cluster hosted in Google Cloud. 
+```sh
+kubectl cluster-info
+
+Kubernetes master is running at https://35.205.126.111
+GLBCDefaultBackend is running at https://35.205.126.111/api/v1/namespaces/kube-system/services/default-http-backend:http/proxy
+Heapster is running at https://35.205.126.111/api/v1/namespaces/kube-system/services/heapster/proxy
+KubeDNS is running at https://35.205.126.111/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+kubernetes-dashboard is running at https://35.205.126.111/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy
+
+```
+
+To delete your cluster:
 ``` sh
 ./gke_admin.sh --delete-cluster
 ```
@@ -58,7 +70,8 @@ You can build the docker image and push the image to the Google Container Respos
 ```sh
 DOCKER_REPO=eu.gcr.io PROJECT=<My Project> make docker
 ```
-# Deployment on the GKE cluster
+# Deployment of the cluster on GKE
+
 Once the image is available in GCR, you can go to the next step, and start the effective deployment of your cluster. 2 options are available:
 * First option is with descriptors (see YMAL files defining the various objects). This will first create a deployment object, asssociate an autoscaler, a POD disruption budget and finally create a Load Balancer directly accessilble on the public Internet.
 ```sh

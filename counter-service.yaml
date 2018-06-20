@@ -5,6 +5,7 @@ metadata:
 spec:
   selector:
     app: counter
+    env: test
   ports:
   - protocol: TCP
     port: 8080

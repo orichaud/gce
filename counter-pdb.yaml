@@ -3,6 +3,10 @@ kind: PodDisruptionBudget
 metadata:
   name: counter-pdb
 spec:
+  selector:
+    matchLabels:
+      app: counter
+      env: test
   maxUnavailable: 1
   selector:
     matchLabels:

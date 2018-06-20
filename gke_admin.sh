@@ -48,10 +48,10 @@ CONFIRM
     echo "+ deploy: deploy with descriptors into cluster $CLUSTER"
     shift
    
-    kubectl create -f counter-deployment.yaml $OPTS
-    kubectl create -f counter-hpa.yaml $OPTS 
-    kubectl create -f counter-pdb.yaml $OPTS
-    kubectl create -f counter-service.yaml $OPTS
+    kubectl apply -f counter-deployment.yaml $OPTS
+    kubectl apply -f counter-hpa.yaml $OPTS 
+    kubectl apply -f counter-pdb.yaml $OPTS
+    kubectl apply -f counter-service.yaml $OPTS
     
     echo "+ deploy: finished"
     ;;
@@ -74,13 +74,13 @@ CONFIRM
 
     OPTS=
 
-    kubectl create deployment counter-deployment --image eu.gcr.io/$PROJECT/hserver $OPTS
+    kubectl create deployment counter-deployment --image eu.gcr.io/$PROJECT/hserver:latest $OPTS
     kubectl scale deployment counter-deployment --replicas=3 $OPTS
     kubectl autoscale deployment counter-deployment --min=3 --max=10 $OPTS
     kubectl expose deployment counter-deployment --name counter-service --type "LoadBalancer"  --port=8080 --target-port=8080 $OPTS
-    kubectl label deployments counter-deployment app=counter version=v2 --overwrite $OPTS
-    kubectl label hpa counter-deployment app=counter version=v2 --overwrite $OPTS
-    kubectl label services counter-service app=counter version=v2 --overwrite $OPTS
+    kubectl label deployments counter-deployment app=counter env=test --overwrite $OPTS
+    kubectl label hpa counter-deployment app=counter env=test --overwrite $OPTS
+    kubectl label services counter-service app=counter env=test --overwrite $OPTS
     
     echo "+ deploy: finished"
     ;;
@@ -89,7 +89,7 @@ CONFIRM
     echo "+ undeploy: undeploy with CLI fom cluster $CLUSTER"
     shift
 
-    kubectl delete deployments,pods,services,hpa -l app=counter,version=v2 $OPTS
+    kubectl delete deployments,pods,services,hpa -l app=counter,env=test $OPTS
 
     echo "+ undeploy: finished"
     ;;

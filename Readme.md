@@ -76,6 +76,7 @@ Once the image is available in GCR, you can go to the next step, and start the e
 
 ## Use descriptors
 First option is with descriptors (see YMAL files defining the various objects). This will first create a deployment object, asssociate an autoscaler, a POD disruption budget and finally create a Load Balancer directly accessilble on the public Internet.
+The approach is a declarative approach which sets the target for the desired state and let Kubernetes apply the changes. This is why `kubectl apply` is used in the script in stead of `kubectl create`.
 You must update the `counter-deployment.yaml` file and update the image URL accordingly so that it matching your target repo and project as we use Google Container Repository:
 ```sh
 image: <DOCKER REPO>/<My Project>/hserver
@@ -107,6 +108,7 @@ poddisruptionbudget.policy "counter-pdb" deleted
 
 ## Use only CLI
 Second option is with CLI options. This will first create a deployment, scale the number of replicas, asssociate an autoscaler and finally create a Load Balancer directly accessilble on the public Internet. No POD Disruption Budget is defined.
+The retained approach is the imperative approach where the desired state is imposed. This is why `kubectl create` is used. To perform a rolling update it will be necessary to record the state in order to be able to roll back. 
  ```sh
 ./gke_admin.sh --deploy-CLI
 ```

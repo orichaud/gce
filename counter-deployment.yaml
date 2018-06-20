@@ -4,22 +4,28 @@ metadata:
   name: counter-deployment
   labels:
     app: counter
-    version: v2
+    env: test
 spec:
   replicas: 3
+  minReadySeconds: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1  
   selector:
     matchLabels:
       app: counter
-      version: v2
+      env: test
   template:
     metadata:
       labels:
         app: counter
-        version: v2
+        env: test
     spec:
       containers:
       - name: count
-        image: eu.gcr.io/mp-box-dev/hserver
+        image: eu.gcr.io/mp-box-dev/hserver:v2
         resources:
           requests:
             memory: "64Mi"

@@ -2,21 +2,21 @@ package main
 
 import (
 	"encoding/json"
-	"net/http"
+	"errors"
 	"fmt"
 	"log"
-	"time"
-	"errors"
-	"sync/atomic"
+	"net/http"
 	"os"
+	"sync/atomic"
+	"time"
 )
-
 
 var counter uint64
 
 type Response struct {
-	Status string `json:"Status"`
-	Response string `json:"Response"`
+	Status   string `json:"status"`
+	Host     string `json:host`
+	Response string `json:"response"`
 }
 
 func (response *Response) Send(writer http.ResponseWriter) error {
@@ -40,19 +40,19 @@ func HandleRequest(writer http.ResponseWriter, request *http.Request) {
 	switch request.Method {
 	case "GET":
 		atomic.AddUint64(&counter, 1)
-		response := &Response { 
-			Status: "OK", 
-			Response: fmt.Sprintf("%s - counter=%d", hostname, atomic.LoadUint64(&counter)) }
+		response := &Response{
+			Status:   "OK",
+			Host:     hostname,
+			Response: fmt.Sprintf("%d", atomic.LoadUint64(&counter))}
 		err = response.Send(writer)
 	default:
-		error := &Response {  
-			Status: "KO", 
-			Response: "error..." }
+		error := &Response{
+			Status: "KO",
+			Host:   hostname}
 		err = error.Send(writer)
-		
 	}
 
-	if err != nil	 {
+	if err != nil {
 		log.Fatal(err)
 		writer.WriteHeader(http.StatusInternalServerError)
 	}

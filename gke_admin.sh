@@ -95,12 +95,21 @@ CONFIRM
     echo "+ test: invoking service"
     shift
     
-    ip=`kubectl get service counter-service -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'  $OPTS`
-    port=`kubectl get service counter-service -o=jsonpath='{.spec.ports[0].port}' $OPTS`
+    ip=""
+    port=""
+    while [[ -z $ip || -z $port ]]
+    do
+        ip=`kubectl get service counter-service -o=jsonpath='{.status.loadBalancer.ingress[0].ip}' $OPTS`
+        port=`kubectl get service counter-service -o=jsonpath='{.spec.ports[0].port}' $OPTS`
 
-    url=http://$ip:$port
-    echo "URL: http://$url/"
-    curl $url
+        sleep 1
+    done
+    url="http://$ip:$port"
+    response=$(curl -sb -H 'Accept: application/json' $url)
+   
+    echo "URL:      $url"
+    echo "Response: $response"
+
     ;;
 
     *)    # unknown option

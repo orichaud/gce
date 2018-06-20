@@ -6,6 +6,9 @@ NS=orns
 
 OPTS=--namespace=$NS
 
+COUNT=5
+
+
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
@@ -105,16 +108,19 @@ CONFIRM
         sleep 1
     done
     url="http://$ip:$port"
-    response=$(curl -sb -H 'Accept: application/json' $url)
-   
     echo "URL:      $url"
-    echo "Response: $response"
 
+    for ((i=0; i<$COUNT;i++))
+    do
+        response=$(curl -sb -H 'Accept: application/json' $url)
+        echo "Response: $response"
+    done
+    echo "+ test: finished"
     ;;
 
     *)    # unknown option
     POSITIONAL+=("$1") # save it in an array for later
-    echo "- unknow noption: failing"
+    echo "- unknown option: failing"
     shift 
     ;;
 esac

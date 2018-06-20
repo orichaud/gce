@@ -25,7 +25,20 @@ spec:
     spec:
       containers:
       - name: count
-        image: eu.gcr.io/mp-box-dev/hserver:v2
+        image: eu.gcr.io/mp-box-dev/hserver:v3
+        ports:
+        - name: liveness-port
+          containerPort: 8080
+          hostPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: liveness-port
+            httpHeaders:
+            - name: X-Liveness
+              value: alive
+          initialDelaySeconds: 3
+          periodSeconds: 3
         resources:
           requests:
             memory: "64Mi"

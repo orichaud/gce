@@ -107,7 +107,7 @@ CONFIRM
 
         sleep 1
     done
-    url="http://$ip:$port"
+    url="http://$ip:$port/counter"
     echo "URL:      $url"
 
     for ((i=0; i<$COUNT;i++))

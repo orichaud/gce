@@ -60,8 +60,16 @@ func HandleRequest(writer http.ResponseWriter, request *http.Request) {
 	log.Printf("Handling request: %s - %s ", request.Method, elapsed)
 }
 
+func HandleLiveness(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(200)
+	w.Header().Set("X-Liveness", "alive")
+	w.Write([]byte("ok"))
+}
+
 func main() {
-	http.HandleFunc("/", HandleRequest)
+	http.HandleFunc("/counter", HandleRequest)
+	http.HandleFunc("/healthz", HandleLiveness)
+
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal("failed to start the HTTP web server", err)
 	}

@@ -9,7 +9,7 @@ You can simply clone this project and follow the instructions defined in this pa
 ## Prequisites
 
 We assume you have installed:
-* GO
+* [GO](https://golang.org)
 * [gcloud]( https://cloud.google.com/sdk/)
 * [kubectl]( https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 * [Docker](https://docs.docker.com/install/): In particular, a local registry must be run and it will be used to push images to Google Container Repository.

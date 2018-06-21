@@ -13,9 +13,11 @@ We assume you have installed:
 * [kubectl]( https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 * [Docker](https://docs.docker.com/install/): In particular, a local registry must be run and it will be used to push images to Google Container Repository.
 
+It also assumes you have created or can create a Google Cloud project that will host the Kubernetes cluster and the deployment of the PODs.
+
 ## Google Cloud account set up
 
-To initialize the environment and connect to your google account, you will run the following commands. It assumes you have a GCP account:
+To initialize the environment and connect to your Google account, you will run the following commands. It assumes you have a GCP account:
 
 ``` sh
 gcloud init
@@ -24,10 +26,10 @@ gcloud auth login
 
 ## Setup
 
-You must have created a project. If not, please creta ea Google Cloud project with the Google Console. You can define the default project (you can refer to this [page](https://cloud.google.com/kubernetes-engine/docs/quickstart)):
+You must have created a project. If not, please create a Google Cloud project with the Google Console. You can define the default project (you can refer to this [page](https://cloud.google.com/kubernetes-engine/docs/quickstart)):
 
 ``` sh 
-gcloud config set project myProject
+gcloud config set project <myProject>
 ```
 
 Then, you can define the regions you want to use and select a default one:
@@ -86,7 +88,7 @@ You must first compile the go source file. The script will build for 2 targets: 
 make build
 ```
 
-You can build the docker image and push the image to the Google Container Repository. This is the latest version of the image that will be picked up by Kubernetes to schedule the deployment of your POD. The base image is based on the latest Golang image:
+You can build the docker image and push the image to the Google Container Repository (in our case the one hosted in Europe). This is the latest version of the image that will be picked up by Kubernetes to schedule the deployment of your POD. The base image is based on the latest Golang image:
 
 ``` sh
 DOCKER_REPO=eu.gcr.io PROJECT=<My Project> make docker

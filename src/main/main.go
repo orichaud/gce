@@ -11,25 +11,30 @@ import (
 	"time"
 )
 
-var counter uint64
-
-type Response struct {
-	Status   string `json:"status"`
-	Host     string `json:host`
-	Response string `json:"response"`
+type counter struct {
+	count uint64
 }
 
-func (response *Response) Send(writer http.ResponseWriter) error {
-	data, err := json.Marshal(*response)
+func (c *counter) Incr() uint64 {
+	return atomic.AddUint64(&c.count, 1)
+}
+
+type response struct {
+	Status   string `json:"status"`
+	Host     string `json:"host"`
+	Response string `json:"response,omitempty"`
+}
+
+func (r *response) Send(w http.ResponseWriter) error {
+	data, err := json.Marshal(*r)
 	if err != nil {
 		return errors.New("Cannot serialize response")
-		writer.WriteHeader(http.StatusInternalServerError)
 	}
-	fmt.Fprintf(writer, string(data))
+	fmt.Fprintf(w, string(data))
 	return nil
 }
 
-func HandleRequest(writer http.ResponseWriter, request *http.Request) {
+func handleRequest(c *counter, w http.ResponseWriter, r *http.Request) {
 	hostname, err := os.Hostname()
 	if err != nil {
 		panic(err)
@@ -37,38 +42,40 @@ func HandleRequest(writer http.ResponseWriter, request *http.Request) {
 
 	start := time.Now()
 
-	switch request.Method {
+	switch r.Method {
 	case "GET":
-		atomic.AddUint64(&counter, 1)
-		response := &Response{
+		resp := &response{
 			Status:   "OK",
 			Host:     hostname,
-			Response: fmt.Sprintf("%d", atomic.LoadUint64(&counter))}
-		err = response.Send(writer)
+			Response: fmt.Sprintf("%d", c.Incr())}
+		err = resp.Send(w)
 	default:
-		error := &Response{
+		resp := &response{
 			Status: "KO",
 			Host:   hostname}
-		err = error.Send(writer)
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		err = resp.Send(w)
 	}
 
 	if err != nil {
 		log.Fatal(err)
-		writer.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 	elapsed := time.Since(start)
-	log.Printf("Handling request: %s - %s ", request.Method, elapsed)
+	log.Printf("Handling request: %s - %s ", r.Method, elapsed)
 }
 
-func HandleLiveness(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(200)
+func handleLiveness(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Liveness", "alive")
 	w.Write([]byte("ok"))
 }
 
 func main() {
-	http.HandleFunc("/counter", HandleRequest)
-	http.HandleFunc("/healthz", HandleLiveness)
+	c := &counter{count: 0}
+	http.HandleFunc("/counter", func(w http.ResponseWriter, r *http.Request) {
+		handleRequest(c, w, r)
+	})
+	http.HandleFunc("/healthz", handleLiveness)
 
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal("failed to start the HTTP web server", err)

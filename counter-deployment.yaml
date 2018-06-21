@@ -11,7 +11,7 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1
+      maxSurge: 2
       maxUnavailable: 1  
   selector:
     matchLabels:
@@ -30,7 +30,7 @@ spec:
         - name: liveness-port
           containerPort: 8080
           hostPort: 8080
-        livenessProbe:
+        readinessProbe:
           httpGet:
             path: /healthz
             port: liveness-port
@@ -38,7 +38,18 @@ spec:
             - name: X-Liveness
               value: alive
           initialDelaySeconds: 3
-          periodSeconds: 3
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: liveness-port
+            httpHeaders:
+            - name: X-Liveness
+              value: alive
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          successThreshold: 1
+          failureThreshold: 3
         resources:
           requests:
             memory: "64Mi"

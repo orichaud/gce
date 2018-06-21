@@ -112,7 +112,7 @@ CONFIRM
 
     for ((i=0; i<$COUNT;i++))
     do
-        response=$(curl -sb -H 'Accept: application/json' $url)
+        response=$(curl -XGET -sb -H 'Accept: application/json' $url)
         echo "Response: $response"
     done
     echo "+ test: finished"

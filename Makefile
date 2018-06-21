@@ -9,12 +9,13 @@ BASEDIR=.
 BINDIR=./bin
 SRCDIR=./src
 DOCKERFILE=./Dockerfile
-CONTAINER=hserver:v3
+CONTAINER=hserver
+VERSION=v3
 SERVERPORT=8080
 DOCKER_REPO=eu.gcr.io
 PROJECT=mp-box-dev
 
-all: build
+all: clean clean-docker build docker
 
 build: $(PKG)
 	- mkdir -p $(BINDIR)
@@ -23,13 +24,14 @@ build: $(PKG)
 	cd $(BINDIR) && rm -f $(SERVER) && ln -s $(SERVER).linux $(SERVER)
 
 docker: $(DOCKERFILE)
-	$(DOCKER) build -t $(CONTAINER) --rm=true $(BASEDIR)
-	$(DOCKER) tag $(CONTAINER) $(DOCKER_REPO)/$(PROJECT)/$(CONTAINER)
-	$(DOCKER) push $(DOCKER_REPO)/$(PROJECT)/$(CONTAINER)
+	$(DOCKER) build -t $(CONTAINER):$(VERSION) --rm=true $(BASEDIR)
+	$(DOCKER) tag $(CONTAINER):$(VERSION) $(DOCKER_REPO)/$(PROJECT)/$(CONTAINER):$(VERSION)
+	$(DOCKER) push $(DOCKER_REPO)/$(PROJECT)/$(CONTAINER):$(VERSION)
+	$(DOCKER) images
 
 clean:
 	- rm -rf $(BINDIR)
 
 clean-docker:
-	- $(DOCKER) rmi -f $(CONTAINER)
-	- $(DOCKER) rm -f $(CONTAINER)
+	- $(DOCKER) rmi -f $(CONTAINER):$(VERSION)
+	- $(DOCKER) rmi -f $(DOCKER_REPO)/$(PROJECT)/$(CONTAINER):$(VERSION)

@@ -9,9 +9,13 @@ You can simply clone this project and follow the instructions defined in this pa
 ## Prequisites
 
 We assume you have installed:
+* GO
 * [gcloud]( https://cloud.google.com/sdk/)
 * [kubectl]( https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 * [Docker](https://docs.docker.com/install/): In particular, a local registry must be run and it will be used to push images to Google Container Repository.
+
+***Tip*** if you use MacOS, use [brew](https://brew.sh) to install all the prerequisites.
+
 
 It also assumes you have created or can create a Google Cloud project that will host the Kubernetes cluster and the deployment of the PODs.
 

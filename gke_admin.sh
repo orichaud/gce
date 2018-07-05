@@ -52,7 +52,7 @@ CONFIRM
     kubectl apply -f counter-hpa.yaml $OPTS 
     kubectl apply -f counter-pdb.yaml $OPTS
     kubectl apply -f counter-service.yaml $OPTS
-    
+    kubectl apply -f counter-netpolicy.yaml $OPTS
     echo "+ deploy: finished"
     ;;
 
@@ -63,8 +63,8 @@ CONFIRM
     kubectl delete -f counter-service.yaml $OPTS
     kubectl delete -f counter-deployment.yaml $OPTS
     kubectl delete -f counter-hpa.yaml $OPTS
-    kubectl delete -f counter-pdb.yaml $OPTS
-    
+    kubectl delete -f counter-pdb.yaml $
+    kubectl delete -f counter-test.yaml $OPTS
     echo "+ undeploy: finished"
     ;;
 
@@ -116,6 +116,21 @@ CONFIRM
         echo "Response: $response"
     done
     echo "+ test: finished"
+    ;;
+
+    --stop-test-internal)
+    echo "+ delete test internal"
+    shift
+    kubectl delete pods/counter-test $OPTS
+    echo "+ delete test internal: finished"
+    ;;
+
+    --start-test-internal)
+    echo "+ start test internal"
+    shift
+    kubectl create -f ./counter-test.yaml $OPTS
+    sleep 5
+    kubectl logs -f counter-test -c test $OPTS
     ;;
 
     *)    # unknown option

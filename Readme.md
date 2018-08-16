@@ -123,7 +123,9 @@ Then you can trigger the create of the cluster and the namespace that will host 
 ./gke_admin.sh --deploy
 
 + deploy: deploy with descriptors into cluster or-cluster
-deployment.extensions "counter-deployment" created
+deployment.apps "redis-master" created
+service "redis-service" created
+deployment.apps "counter-deployment" created
 horizontalpodautoscaler.autoscaling "counter-hpa" created
 poddisruptionbudget.policy "counter-pdb" created
 service "counter-service" created
@@ -138,9 +140,11 @@ Then to dismantle:
 
 + undeploy: undeploy with descriptors from cluster or-cluster
 service "counter-service" deleted
-deployment.extensions "counter-deployment" deleted
+deployment.apps "counter-deployment" deleted
 horizontalpodautoscaler.autoscaling "counter-hpa" deleted
 poddisruptionbudget.policy "counter-pdb" deleted
+deployment.apps "redis-master" deleted
+service "redis-service" deleted
 + undeploy: finished
 # done
 ```

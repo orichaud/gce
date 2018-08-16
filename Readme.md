@@ -4,12 +4,17 @@
 
 This is a simple tutorial including some advanced concepts like autoscaler and POD disruption budget for those wanting to start with Google Cloud and Kubernetes. It is based on a simple GO program. 
 
+2 deployments are defined:
+* `counter-deployment` spawns a single container running a go program with 2 URIs `/counter` (container lcoal counter) and `/redis` (global redis counter);
+* a `redis-deployment` that runs a single Redis instance. It will host a single global counter incremented by invoking the `/redis` URI.
+
+
 You can simply clone this project and follow the instructions defined in this page.
 
 ## Prequisites
 
 We assume you have installed:
-* [GO](https://golang.org)
+* [GO](https://golang.org) 
 * [gcloud]( https://cloud.google.com/sdk/)
 * [kubectl]( https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 * [Docker](https://docs.docker.com/install/): In particular, a local registry must be run and it will be used to push images to Google Container Repository.
@@ -145,6 +150,8 @@ poddisruptionbudget.policy "counter-pdb" deleted
 Second option is with CLI options. This will first create a deployment, scale the number of replicas, asssociate an autoscaler and finally create a Load Balancer directly accessilble on the public Internet. No POD Disruption Budget is defined.
 The retained approach is the imperative approach where the desired state is imposed. This is why `kubectl create` is used. To perform a rolling update it will be necessary to record the state in order to be able to roll back.
 
+***With the CLI, the Redis deployment is not created.*** Thus, access URI `/redis` will lead to an error.
+
  ``` sh
 ./gke_admin.sh --deploy-CLI
 ```
@@ -162,28 +169,34 @@ In both cases, you can check the objects have been created. For example with the
 ``` sh
 kubectl get all --namespace=orns --show-labels
 
-NAME                                      READY     STATUS    RESTARTS   AGE       LABELS
-pod/counter-deployment-86699789d4-8qmtx   1/1       Running   0          38s       app=counter,pod-template-hash=4225534580,version=v2
-pod/counter-deployment-86699789d4-8xgsz   1/1       Running   0          38s       app=counter,pod-template-hash=4225534580,version=v2
-pod/counter-deployment-86699789d4-tpqb9   1/1       Running   0          38s       app=counter,pod-template-hash=4225534580,version=v2
+AME                                      READY     STATUS    RESTARTS   AGE       LABELS
+pod/counter-deployment-6984666dc4-52lsb   1/1       Running   0          12m       app=counter,env=test,pod-template-hash=2540222870
+pod/counter-deployment-6984666dc4-flmzr   1/1       Running   0          12m       app=counter,env=test,pod-template-hash=2540222870
+pod/counter-deployment-6984666dc4-h6qkr   1/1       Running   0          12m       app=counter,env=test,pod-template-hash=2540222870
+pod/redis-master-8444588cb-qs2t6          1/1       Running   0          12m       app=redis,env=test,pod-template-hash=400014476
 
-NAME                      TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE       LABELS
-service/counter-service   LoadBalancer   10.27.247.11   <pending>     8080:32030/TCP   36s       <none>
+NAME                      TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)          AGE       LABELS
+service/counter-service   LoadBalancer   10.27.253.253   35.205.246.235   8080:31336/TCP   12m       <none>
+service/redis-service     ClusterIP      10.27.251.95    <none>           6379/TCP         12m       app=redis,env=test
 
 NAME                                       DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       LABELS
-deployment.extensions/counter-deployment   3         3         3            3           38s       app=counter,version=v2
+deployment.extensions/counter-deployment   3         3         3            3           12m       app=counter,env=test
+deployment.extensions/redis-master         1         1         1            1           12m       app=redis
 
 NAME                                                  DESIRED   CURRENT   READY     AGE       LABELS
-replicaset.extensions/counter-deployment-86699789d4   3         3         3         38s       app=counter,pod-template-hash=4225534580,version=v2
+replicaset.extensions/counter-deployment-6984666dc4   3         3         3         12m       app=counter,env=test,pod-template-hash=2540222870
+replicaset.extensions/redis-master-8444588cb          1         1         1         12m       app=redis,env=test,pod-template-hash=400014476
 
 NAME                                 DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       LABELS
-deployment.apps/counter-deployment   3         3         3            3           38s       app=counter,version=v2
+deployment.apps/counter-deployment   3         3         3            3           12m       app=counter,env=test
+deployment.apps/redis-master         1         1         1            1           12m       app=redis
 
 NAME                                            DESIRED   CURRENT   READY     AGE       LABELS
-replicaset.apps/counter-deployment-86699789d4   3         3         3         38s       app=counter,pod-template-hash=4225534580,version=v2
+replicaset.apps/counter-deployment-6984666dc4   3         3         3         12m       app=counter,env=test,pod-template-hash=2540222870
+replicaset.apps/redis-master-8444588cb          1         1         1         12m       app=redis,env=test,pod-template-hash=400014476
 
-NAME                                              REFERENCE                       TARGETS         MINPODS   MAXPODS   REPLICAS   AGE       LABELS
-horizontalpodautoscaler.autoscaling/counter-hpa   Deployment/counter-deployment   <unknown>/10%   3         10        0          37s       <none>
+NAME                                              REFERENCE                       TARGETS   MINPODS   MAXPODS   REPLICAS   AGE       LABELS
+horizontalpodautoscaler.autoscaling/counter-hpa   Deployment/counter-deployment   0%/10%    3         10        3          12m       <none>
 ```
 
 ## Testing
@@ -191,9 +204,9 @@ horizontalpodautoscaler.autoscaling/counter-hpa   Deployment/counter-deployment 
 You can check the service with `kubectl get services --namespace=orns`. Your service is available for external traffic once the EXTERNAL-IP is defined and not marked as pending:
 
 ``` sh
-NAME              TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)          AGE
-counter-service   LoadBalancer   10.27.241.241   35.233.100.85   8080:30000/TCP   1m
-kubernetes        ClusterIP      10.27.240.1     <none>          443/TCP          8h
+NAME              TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)          AGE
+counter-service   LoadBalancer   10.27.253.253   35.205.246.235   8080:31336/TCP   11m
+redis-service     ClusterIP      10.27.251.95    <none>           6379/TCP         11m
 ```
 
 The script will check the availability of the EXTERNAL-IP and try every second until the service becomes ready.
@@ -207,7 +220,14 @@ whose output is:
 
 ``` sh
 + test: invoking service
-URL:      http://35.195.16.161:8080
-Response: {"Status":"OK","Response":"counter-deployment-76859979f9-5stw8 - counter=1"}
+URL:      http://35.195.16.161:8080/counter
+Response: {"status":"OK","host":"counter-deployment-6984666dc4-flmzr","response":"7","type":"count"}
+...
+URL:      http://35.205.246.235:8080/redis
+Response: {"status":"OK","host":"counter-deployment-6984666dc4-52lsb","response":"13","type":"kcount"}
+...
 # done
 ```
+you will notice the 2 URIs invoked:
+* `/counter` invokes the atomic counter local to a POD.
+* `/redis` will access `kcount` variable managed by the Redis instance. This results in incrementing a global counter.

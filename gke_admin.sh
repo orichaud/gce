@@ -48,11 +48,14 @@ CONFIRM
     echo "+ deploy: deploy with descriptors into cluster $CLUSTER"
     shift
    
+    kubectl apply -f redis-deployment.yaml $OPTS
+    kubectl apply -f redis-service.yaml $OPTS
+
     kubectl apply -f counter-deployment.yaml $OPTS
     kubectl apply -f counter-hpa.yaml $OPTS 
     kubectl apply -f counter-pdb.yaml $OPTS
     kubectl apply -f counter-service.yaml $OPTS
-    kubectl apply -f counter-netpolicy.yaml $OPTS
+ #   kubectl apply -f counter-netpolicy.yaml $OPTS
     echo "+ deploy: finished"
     ;;
 
@@ -63,8 +66,12 @@ CONFIRM
     kubectl delete -f counter-service.yaml $OPTS
     kubectl delete -f counter-deployment.yaml $OPTS
     kubectl delete -f counter-hpa.yaml $OPTS
-    kubectl delete -f counter-pdb.yaml $
+    kubectl delete -f counter-pdb.yaml $OPTS
     kubectl delete -f counter-test.yaml $OPTS
+
+    kubectl delete -f redis-deployment.yaml $OPTS
+    kubectl delete -f redis-service.yaml $OPTS
+
     echo "+ undeploy: finished"
     ;;
 
@@ -115,6 +122,16 @@ CONFIRM
         response=$(curl -XGET -sb -H 'Accept: application/json' $url)
         echo "Response: $response"
     done
+
+    url="http://$ip:$port/redis"
+    echo "URL:      $url"
+
+    for ((i=0; i<$COUNT;i++))
+    do
+        response=$(curl -XGET -sb -H 'Accept: application/json' $url)
+        echo "Response: $response"
+    done
+
     echo "+ test: finished"
     ;;
 

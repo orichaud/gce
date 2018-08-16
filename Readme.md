@@ -201,7 +201,7 @@ horizontalpodautoscaler.autoscaling/counter-hpa   Deployment/counter-deployment 
 
 ## Testing
 
-You can check the service with `kubectl get services --namespace=orns`. Your service is available for external traffic once the EXTERNAL-IP is defined and not marked as pending:
+You can check the service with `kubectl get services --namespace=orns`. The `counter-service` service is available for external traffic once the EXTERNAL-IP is defined and not marked as pending. The `redis-service` is just a ClusterIP accessible within the cluster to expose the Redis instance.
 
 ``` sh
 NAME              TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)          AGE

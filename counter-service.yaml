@@ -2,10 +2,11 @@ kind: Service
 apiVersion: v1
 metadata:
   name: counter-service
+  labels:
+    app: counter
 spec:
   selector:
     app: counter
-    env: test
   ports:
   - protocol: TCP
     port: 8080

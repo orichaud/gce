@@ -4,11 +4,9 @@ metadata:
   name: redis-service
   labels:
     app: redis
-    env: test
 spec:
   ports:
   - port: 6379
     targetPort: 6379
   selector:
     app: redis
-    env: test

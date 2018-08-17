@@ -23,9 +23,10 @@ case $key in
         --preemptible \
         --num-nodes=3 --enable-autoscaling --min-nodes=3 --max-nodes=10 \
         --machine-type=n1-standard-1 \
-        --tags=or-cluster \
+        --tags=$CLUSTER \
         --enable-cloud-logging --enable-cloud-monitoring  \
-        --enable-autorepair --enable-autoupgrade
+        --enable-autorepair --enable-autoupgrade \
+        --enable-network-policy
 
     kubectl create namespace $NS
 
@@ -47,6 +48,8 @@ CONFIRM
     --deploy)
     echo "+ deploy: deploy with descriptors into cluster $CLUSTER"
     shift
+
+    kubectl apply -f denyall-netpolicy.yaml $OPTS
    
     kubectl apply -f redis-deployment.yaml $OPTS
     kubectl apply -f redis-service.yaml $OPTS
@@ -55,7 +58,10 @@ CONFIRM
     kubectl apply -f counter-hpa.yaml $OPTS 
     kubectl apply -f counter-pdb.yaml $OPTS
     kubectl apply -f counter-service.yaml $OPTS
- #   kubectl apply -f counter-netpolicy.yaml $OPTS
+
+    kubectl apply -f redis-netpolicy.yaml $OPTS
+    kubectl apply -f counter-netpolicy.yaml $OPTS
+
     echo "+ deploy: finished"
     ;;
 
@@ -68,9 +74,14 @@ CONFIRM
     kubectl delete -f counter-hpa.yaml $OPTS
     kubectl delete -f counter-pdb.yaml $OPTS
     kubectl delete -f counter-test.yaml $OPTS
+    kubectl delete -f counter-redis-test.yaml $OPTS
 
     kubectl delete -f redis-deployment.yaml $OPTS
     kubectl delete -f redis-service.yaml $OPTS
+
+    kubectl delete -f redis-netpolicy.yaml $OPTS
+    kubectl delete -f counter-netpolicy.yaml $OPTS
+    kubectl delete -f denyall-netpolicy.yaml $OPTS
 
     echo "+ undeploy: finished"
     ;;

@@ -4,7 +4,7 @@ metadata:
   name: counter-deployment
   labels:
     app: counter
-    env: test
+    redis: user
 spec:
   replicas: 3
   minReadySeconds: 1
@@ -16,12 +16,12 @@ spec:
   selector:
     matchLabels:
       app: counter
-      env: test
+      redis: user
   template:
     metadata:
       labels:
         app: counter
-        env: test
+        redis: user
     spec:
       containers:
       - name: count

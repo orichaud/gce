@@ -92,7 +92,6 @@ func handleRequestWithRedis(c *counter, w http.ResponseWriter, r *http.Request) 
 
 	switch r.Method {
 	case "GET":
-
 		c.redisClient.Incr("kcount")
 
 		kcount, err := c.redisClient.Get("kcount").Int64()

@@ -8,6 +8,9 @@ OPTS=--namespace=$NS
 
 COUNT=5
 
+CLUSTER_USERNAME=admin
+CLUSTER_PASSWORD=admin1234adminfsdfoisfou
+
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -26,7 +29,12 @@ case $key in
         --tags=$CLUSTER \
         --enable-cloud-logging --enable-cloud-monitoring  \
         --enable-autorepair --enable-autoupgrade \
-        --enable-network-policy
+        --enable-network-policy \
+        --enable-ip-alias \
+        --issue-client-certificate \
+        --no-enable-legacy-authorization \
+        --username=$CLUSTER_USERNAME \
+        --password=$CLUSTER_PASSWORD
 
     kubectl create namespace $NS
 
@@ -51,6 +59,8 @@ CONFIRM
 
     kubectl apply -f denyall-netpolicy.yaml $OPTS
    
+    kubectl apply -f redis-storageclass.yaml $OPTS
+    kubectl apply -f redis-pvc.yaml $OPTS
     kubectl apply -f redis-deployment.yaml $OPTS
     kubectl apply -f redis-service.yaml $OPTS
 
@@ -61,6 +71,7 @@ CONFIRM
 
     kubectl apply -f redis-netpolicy.yaml $OPTS
     kubectl apply -f counter-netpolicy.yaml $OPTS
+    kubectl apply -f egress-networkpolicy.yaml $OPTS
 
     echo "+ deploy: finished"
     ;;
@@ -68,17 +79,20 @@ CONFIRM
     --undeploy)
     echo "+ undeploy: undeploy with descriptors from cluster $CLUSTER"
     shift
+    kubectl delete -f counter-test.yaml $OPTS
+    kubectl delete -f counter-redis-test.yaml $OPTS
 
     kubectl delete -f counter-service.yaml $OPTS
     kubectl delete -f counter-deployment.yaml $OPTS
     kubectl delete -f counter-hpa.yaml $OPTS
     kubectl delete -f counter-pdb.yaml $OPTS
-    kubectl delete -f counter-test.yaml $OPTS
-    kubectl delete -f counter-redis-test.yaml $OPTS
 
     kubectl delete -f redis-deployment.yaml $OPTS
     kubectl delete -f redis-service.yaml $OPTS
+    kubectl delete -f redis-pvc.yaml $OPTS
+    kubectl delete -f redis-storageclass.yaml $OPTS
 
+    kubectl delete -f egress-networkpolicy.yaml $OPTS
     kubectl delete -f redis-netpolicy.yaml $OPTS
     kubectl delete -f counter-netpolicy.yaml $OPTS
     kubectl delete -f denyall-netpolicy.yaml $OPTS

@@ -1,9 +1,23 @@
-kind: Pod
-apiVersion: v1
-metadata: 
+kind: Deployment
+apiVersion:	apps/v1
+metadata:
   name: counter-redis-test
+  labels:
+    app: counter
+    traffic: outgoing
 spec:
-  containers:
-  - name: test
-    image: busybox
-    command: ['sh', '-c', 'while [ 1 ]; do wget -qO- http://$COUNTER_SERVICE_SERVICE_HOST:$COUNTER_SERVICE_SERVICE_PORT/redis && echo ""; sleep 2; done']
+  replicas: 1
+  selector:
+    matchLabels:
+      app: counter
+      traffic: outgoing
+  template:
+    metadata:
+      labels:
+        app: counter
+        traffic: outgoing
+    spec:
+      containers:
+      - name: test
+        image: busybox
+        command: ['sh', '-c', 'while [ 1 ]; do wget -qO- http://$COUNTER_SERVICE_SERVICE_HOST:$COUNTER_SERVICE_SERVICE_PORT/redis && echo ""; sleep 2; done']

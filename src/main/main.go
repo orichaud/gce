@@ -38,6 +38,7 @@ func (r *response) Send(w http.ResponseWriter) error {
 	if err != nil {
 		return errors.New("Cannot serialize response")
 	}
+	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, string(data))
 	return nil
 }
@@ -128,6 +129,7 @@ func handleRequestWithRedis(c *counter, w http.ResponseWriter, r *http.Request) 
 
 // Probe handler for liveness and readiness. Used only by Kubernetes.
 func handleLiveness(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 	w.Header().Set("X-Liveness", "alive")
 	w.Write([]byte("ok"))
 }

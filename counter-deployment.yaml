@@ -27,6 +27,8 @@ spec:
       - name: count
         image: eu.gcr.io/mp-box-dev/hserver:v3
         imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
         readinessProbe:
           httpGet:
             path: /healthz

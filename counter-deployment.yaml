@@ -27,14 +27,10 @@ spec:
       - name: count
         image: eu.gcr.io/mp-box-dev/hserver:v3
         imagePullPolicy: Always
-        ports:
-        - name: liveness-port
-          containerPort: 8080
-          hostPort: 8080
         readinessProbe:
           httpGet:
             path: /healthz
-            port: liveness-port
+            port: 8080
             httpHeaders:
             - name: X-Liveness
               value: alive
@@ -43,7 +39,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /healthz
-            port: liveness-port
+            port: 8080
             httpHeaders:
             - name: X-Liveness
               value: alive

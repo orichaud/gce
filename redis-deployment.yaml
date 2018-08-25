@@ -21,6 +21,10 @@ spec:
         env:
         - name: MASTER
           value: "true"
+        lifecycle:
+          postStart:
+            exec:
+              command: ['sh', '-c', 'redis-cli config set appendonly yes']
         resources:
           requests:
             cpu: 100m

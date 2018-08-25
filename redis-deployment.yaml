@@ -13,13 +13,25 @@ spec:
     metadata:
       labels:
         app: redis
+        role: master
     spec:
       containers:
       - name: redis-master
         image: k8s.gcr.io/redis
+        env:
+        - name: MASTER
+          value: "true"
         resources:
           requests:
             cpu: 100m
             memory: 100Mi
         ports:
         - containerPort: 6379
+        volumeMounts: 
+        - name: redis-data
+          mountPath: /data
+      volumes:
+      - name: redis-data
+        persistentVolumeClaim:
+          claimName: redis-data-pvc
+      

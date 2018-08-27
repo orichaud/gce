@@ -108,8 +108,6 @@ CONFIRM
     echo "+ deploy: deploy with CLI into cluster $CLUSTER"
     shift
 
-    OPTS=
-
     kubectl create deployment counter-deployment --image eu.gcr.io/$PROJECT/hserver:latest $OPTS
     kubectl scale deployment counter-deployment --replicas=3 $OPTS
     kubectl autoscale deployment counter-deployment --min=3 --max=10 $OPTS

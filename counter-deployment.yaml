@@ -23,6 +23,7 @@ spec:
         app: counter
         redis: user
     spec:
+      serviceAccountName: counter-sa
       containers:
       - name: count
         image: eu.gcr.io/mp-box-dev/hserver:v3

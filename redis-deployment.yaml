@@ -15,12 +15,16 @@ spec:
         app: redis
         role: master
     spec:
+      serviceAccountName: redis-sa
       containers:
       - name: redis-master
         image: k8s.gcr.io/redis
         env:
         - name: MASTER
           value: "true"
+        readinessProbe:
+          exec:
+            command: ['sh', '-c', 'redis-cli info server']
         lifecycle:
           postStart:
             exec:

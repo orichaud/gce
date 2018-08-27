@@ -59,11 +59,13 @@ CONFIRM
 
     kubectl apply -f denyall-netpolicy.yaml $OPTS
    
+    kubectl apply -f redis-sa.yaml $OPTS
     kubectl apply -f redis-storageclass.yaml $OPTS
     kubectl apply -f redis-pvc.yaml $OPTS
     kubectl apply -f redis-deployment.yaml $OPTS
     kubectl apply -f redis-service.yaml $OPTS
 
+    kubectl apply -f counter-sa.yaml $OPTS
     kubectl apply -f counter-deployment.yaml $OPTS
     kubectl apply -f counter-hpa.yaml $OPTS 
     kubectl apply -f counter-pdb.yaml $OPTS
@@ -86,11 +88,13 @@ CONFIRM
     kubectl delete -f counter-deployment.yaml $OPTS
     kubectl delete -f counter-hpa.yaml $OPTS
     kubectl delete -f counter-pdb.yaml $OPTS
+    kubectl delete -f counter-sa.yaml $OPTS
 
     kubectl delete -f redis-deployment.yaml $OPTS
     kubectl delete -f redis-service.yaml $OPTS
     kubectl delete -f redis-pvc.yaml $OPTS
     kubectl delete -f redis-storageclass.yaml $OPTS
+    kubectl delete -f redis-sa.yaml $OPTS
 
     kubectl delete -f egress-networkpolicy.yaml $OPTS
     kubectl delete -f redis-netpolicy.yaml $OPTS

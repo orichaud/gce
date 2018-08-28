@@ -11,6 +11,7 @@ COUNT=5
 CLUSTER_USERNAME=admin
 CLUSTER_PASSWORD=admin1234adminfsdfoisfou
 
+DESCRIPTORS=./descriptors
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -57,23 +58,23 @@ CONFIRM
     echo "+ deploy: deploy with descriptors into cluster $CLUSTER"
     shift
 
-    kubectl apply -f denyall-netpolicy.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/denyall-netpolicy.yaml $OPTS
    
-    kubectl apply -f redis-sa.yaml $OPTS
-    kubectl apply -f redis-storageclass.yaml $OPTS
-    kubectl apply -f redis-pvc.yaml $OPTS
-    kubectl apply -f redis-deployment.yaml $OPTS
-    kubectl apply -f redis-service.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/redis-sa.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/redis-storageclass.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/redis-pvc.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/redis-deployment.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/redis-service.yaml $OPTS
 
-    kubectl apply -f counter-sa.yaml $OPTS
-    kubectl apply -f counter-deployment.yaml $OPTS
-    kubectl apply -f counter-hpa.yaml $OPTS 
-    kubectl apply -f counter-pdb.yaml $OPTS
-    kubectl apply -f counter-service.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/counter-sa.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/counter-deployment.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/counter-hpa.yaml $OPTS 
+    kubectl apply -f $DESCRIPTORS/counter-pdb.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/counter-service.yaml $OPTS
 
-    kubectl apply -f redis-netpolicy.yaml $OPTS
-    kubectl apply -f counter-netpolicy.yaml $OPTS
-    kubectl apply -f egress-networkpolicy.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/redis-netpolicy.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/counter-netpolicy.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/egress-networkpolicy.yaml $OPTS
 
     echo "+ deploy: finished"
     ;;
@@ -81,25 +82,25 @@ CONFIRM
     --undeploy)
     echo "+ undeploy: undeploy with descriptors from cluster $CLUSTER"
     shift
-    kubectl delete -f counter-test.yaml $OPTS
-    kubectl delete -f counter-redis-test.yaml $OPTS
+    kubectl delete -f $DESCRIPTORS/counter-test.yaml $OPTS
+    kubectl delete -f $DESCRIPTORS/counter-redis-test.yaml $OPTS
 
-    kubectl delete -f counter-service.yaml $OPTS
-    kubectl delete -f counter-deployment.yaml $OPTS
-    kubectl delete -f counter-hpa.yaml $OPTS
-    kubectl delete -f counter-pdb.yaml $OPTS
-    kubectl delete -f counter-sa.yaml $OPTS
+    kubectl delete -f $DESCRIPTORS/counter-service.yaml $OPTS
+    kubectl delete -f $DESCRIPTORS/counter-deployment.yaml $OPTS
+    kubectl delete -f $DESCRIPTORS/counter-hpa.yaml $OPTS
+    kubectl delete -f $DESCRIPTORS/counter-pdb.yaml $OPTS
+    kubectl delete -f $DESCRIPTORS/counter-sa.yaml $OPTS
 
-    kubectl delete -f redis-deployment.yaml $OPTS
-    kubectl delete -f redis-service.yaml $OPTS
-    kubectl delete -f redis-pvc.yaml $OPTS
-    kubectl delete -f redis-storageclass.yaml $OPTS
-    kubectl delete -f redis-sa.yaml $OPTS
+    kubectl delete -f $DESCRIPTORS/redis-deployment.yaml $OPTS
+    kubectl delete -f $DESCRIPTORS/redis-service.yaml $OPTS
+    kubectl delete -f $DESCRIPTORS/redis-pvc.yaml $OPTS
+    kubectl delete -f $DESCRIPTORS/redis-storageclass.yaml $OPTS
+    kubectl delete -f $DESCRIPTORS/redis-sa.yaml $OPTS
 
-    kubectl delete -f egress-networkpolicy.yaml $OPTS
-    kubectl delete -f redis-netpolicy.yaml $OPTS
-    kubectl delete -f counter-netpolicy.yaml $OPTS
-    kubectl delete -f denyall-netpolicy.yaml $OPTS
+    kubectl delete -f $DESCRIPTORS/egress-networkpolicy.yaml $OPTS
+    kubectl delete -f $DESCRIPTORS/redis-netpolicy.yaml $OPTS
+    kubectl delete -f $DESCRIPTORS/counter-netpolicy.yaml $OPTS
+    kubectl delete -f $DESCRIPTORS/denyall-netpolicy.yaml $OPTS
 
     echo "+ undeploy: finished"
     ;;

@@ -2,6 +2,7 @@
 
 PROJECT=mp-box-dev
 CLUSTER=or-cluster
+NETWORK=or-net
 NS=orns
 
 OPTS=--namespace=$NS
@@ -23,6 +24,8 @@ case $key in
     echo "+ create: start cluster $CLUSTER"
     shift
 
+    gcloud compute networks create $NETWORK
+
     gcloud container clusters create $CLUSTER \
         --preemptible \
         --num-nodes=3 --enable-autoscaling --min-nodes=3 --max-nodes=10 \
@@ -34,6 +37,7 @@ case $key in
         --enable-ip-alias \
         --issue-client-certificate \
         --no-enable-legacy-authorization \
+        --network=$NETWORK \
         --username=$CLUSTER_USERNAME \
         --password=$CLUSTER_PASSWORD
 
@@ -48,6 +52,9 @@ case $key in
     kubectl delete namespace $NS
     gcloud container clusters delete $CLUSTER << CONFIRM
     Y
+    Y
+CONFIRM
+    gcloud compute networks delete or-net << CONFIRM
     Y
 CONFIRM
 

@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: counter-operator
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  creationTimestamp: null
+  name: counter-operator
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  - endpoints
+  - persistentvolumeclaims
+  - events
+  - configmaps
+  - secrets
+  verbs:
+  - '*'
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - daemonsets
+  - replicasets
+  - statefulsets
+  verbs:
+  - '*'
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - servicemonitors
+  verbs:
+  - get
+  - create
+- apiGroups:
+  - counter.richaud.net
+  resources:
+  - '*'
+  verbs:
+  - '*'
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: counter-operator
+subjects:
+- kind: ServiceAccount
+  name: counter-operator
+roleRef:
+  kind: Role
+  name: counter-operator
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: counter-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: counter-operator
+  template:
+    metadata:
+      labels:
+        name: counter-operator
+    spec:
+      serviceAccountName: counter-operator
+      containers:
+        - name: counter-operator
+          # Replace this with the built image name
+          image: eu.gcr.io/mp-box-dev/counter-operator:v1
+          ports:
+          - containerPort: 60000
+            name: metrics
+          command:
+          - counter-operator
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "counter-operator"

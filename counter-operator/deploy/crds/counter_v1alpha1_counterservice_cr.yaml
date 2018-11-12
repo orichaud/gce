@@ -1,0 +1,6 @@
+apiVersion: counter.richaud.net/v1alpha1
+kind: CounterService
+metadata:
+  name: counter-cr
+spec:
+    backends: 5

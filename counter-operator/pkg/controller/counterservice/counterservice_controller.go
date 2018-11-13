@@ -4,7 +4,6 @@ import (
 	"context"
 	"io/ioutil"
 	"log"
-	"time"
 
 	counterv1alpha1 "github.com/gce/counter-operator/pkg/apis/counter/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
@@ -74,6 +73,7 @@ type ReconcileCounterService struct {
 	scheme *runtime.Scheme
 }
 
+// ReconcilerContext this is the execution context to perform operator management with reconciliation handlers
 type ReconcilerContext struct {
 	reconciler     *ReconcileCounterService
 	request        reconcile.Request
@@ -84,8 +84,13 @@ type ReconcilerContext struct {
 // PackagedObjectHandler manages a list of packaged k8s object and process them
 type PackagedObjectHandler struct {
 	name                string
-	reconcileDeployment func(founDep *appsv1.Deployment, rcontext *ReconcilerContext) error
+	reconcileDeployment func(foundDep *appsv1.Deployment, rcontext *ReconcilerContext) error
+	reconcileService    func(foundSvc *corev1.Service, rcontext *ReconcilerContext) error
 }
+
+var handlers = []*PackagedObjectHandler{
+	&PackagedObjectHandler{name: "counter", reconcileDeployment: reconcileCounterDeployment, reconcileService: reconcileServiceDefault},
+	&PackagedObjectHandler{name: "redis", reconcileDeployment: reconcileRedisDeployment, reconcileService: reconcileServiceDefault}}
 
 func reconcileCounterDeployment(dep *appsv1.Deployment, rcontext *ReconcilerContext) error {
 	log.Printf("Reconciling Counter Deploymnet %s/%s\n", dep.Namespace, dep.Name)
@@ -103,8 +108,13 @@ func reconcileCounterDeployment(dep *appsv1.Deployment, rcontext *ReconcilerCont
 	return nil
 }
 
+func reconcileServiceDefault(dep *corev1.Service, rcontext *ReconcilerContext) error {
+	log.Printf("Reconciling service %s/%s - default\n", dep.Namespace, dep.Name)
+	return nil
+}
+
 func reconcileRedisDeployment(dep *appsv1.Deployment, context *ReconcilerContext) error {
-	log.Printf("Reconciling Redis Deploymnet %s/%s\n", dep.Namespace, dep.Name)
+	log.Printf("Reconciling Redis Deployment %s/%s\n", dep.Namespace, dep.Name)
 	return nil
 }
 
@@ -113,9 +123,6 @@ func newReconcilerContext(reconciler *ReconcileCounterService, request reconcile
 	if err := reconciler.client.Get(context.TODO(), request.NamespacedName, cs); err != nil {
 		return nil, err
 	}
-	handlers := []*PackagedObjectHandler{
-		&PackagedObjectHandler{name: "counter", reconcileDeployment: reconcileCounterDeployment},
-		&PackagedObjectHandler{name: "redis", reconcileDeployment: reconcileRedisDeployment}}
 
 	return &ReconcilerContext{
 		reconciler:     reconciler,
@@ -135,21 +142,22 @@ func (r *ReconcileCounterService) Reconcile(request reconcile.Request) (reconcil
 	context, err := newReconcilerContext(r, request)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			return reconcile.Result{RequeueAfter: time.Second * 5}, nil
+			log.Printf("%s/%s not found, exiting\n", request.Namespace, request.Name)
+			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
-		return reconcile.Result{RequeueAfter: time.Second * 5}, err
+		return reconcile.Result{}, err
 	}
 
 	for _, handler := range context.handlers {
 		// try create the various deployments and services
 		if err := context.ProcessHandler(handler); err != nil {
-			return reconcile.Result{RequeueAfter: time.Second * 5}, err
+			return reconcile.Result{}, err
 		}
 	}
 
 	// return and requeue
-	return reconcile.Result{RequeueAfter: time.Second * 5}, nil
+	return reconcile.Result{}, nil
 }
 
 // ProcessHandler Will create packaged obejcts and adjust with reconciliation
@@ -207,12 +215,19 @@ func (rcontext *ReconcilerContext) ProcessHandler(handler *PackagedObjectHandler
 		return err
 	}
 	if handler.reconcileDeployment != nil {
-		handler.reconcileDeployment(foundDep, rcontext)
+		if err := handler.reconcileDeployment(foundDep, rcontext); err != nil {
+			return err
+		}
 	}
 
 	foundSvc := &corev1.Service{}
 	if err := createOrRetrieve(serviceName(handler), foundSvc); err != nil {
 		return err
+	}
+	if handler.reconcileService != nil {
+		if err := handler.reconcileService(foundSvc, rcontext); err != nil {
+			return err
+		}
 	}
 
 	return nil

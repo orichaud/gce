@@ -11,11 +11,13 @@ spec:
     matchLabels:
       app: counter
       traffic: outgoing
+      name: counter-test
   template:
     metadata:
       labels:
         app: counter
         traffic: outgoing
+        name: counter-test
     spec:
       containers:
       - name: test

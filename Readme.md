@@ -151,24 +151,11 @@ service "redis-service" deleted
 
 ### Use only CLI
 
-Second option is with CLI options. This will first create a deployment, scale the number of replicas, asssociate an autoscaler and finally create a Load Balancer directly accessilble on the public Internet. No POD Disruption Budget is defined.
-The retained approach is the imperative approach where the desired state is imposed. This is why `kubectl create` is used. To perform a rolling update it will be necessary to record the state in order to be able to roll back.
+Second option is with CLI options. This is too limited and discontinued.
 
-***With the CLI, the Redis deployment is not created.*** Thus, access URI `/redis` will lead to an error.
+### Final deployment
 
- ``` sh
-./gke_admin.sh --deploy-CLI
-```
-
-Then to dismantle:
-
-``` sh
-./gke_admin.sh --undeploy-CLI
-```
-
-The CLI options are limited. The YAML offers much more possibilities to configure the Kubernetes objects.
-
-In both cases, you can check the objects have been created. For example with the first option, the output shoud look like what follows:
+For example with the first option, the output shoud look like what follows:
 
 ``` sh
 kubectl get all --namespace=orns --show-labels

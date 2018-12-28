@@ -21,7 +21,7 @@ key="$1"
 
 case $key in
     --create-cluster)
-    echo "+ create: start cluster $CLUSTER"
+    echo "+ create: start cluster $CLUSTER and initialize network and storage"
     shift
 
     gcloud compute networks create $NETWORK
@@ -42,6 +42,21 @@ case $key in
         --password=$CLUSTER_PASSWORD
 
     kubectl create namespace $NS
+
+    kubectl apply -f $DESCRIPTORS/denyall-netpolicy.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/egress-networkpolicy.yaml $OPTS
+
+    kubectl apply -f $DESCRIPTORS/redis-sa.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/redis-storageclass.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/redis-pvc.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/redis-netpolicy.yaml $OPTS
+
+    kubectl apply -f $DESCRIPTORS/counter-sa.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/counter-hpa.yaml $OPTS 
+    kubectl apply -f $DESCRIPTORS/counter-pdb.yaml $OPTS
+    kubectl apply -f $DESCRIPTORS/counter-netpolicy.yaml $OPTS
+
+    kubectl create -f counter-operator/deploy/service_account.yaml
 
     echo "+ create: finished"
     ;;
@@ -65,23 +80,11 @@ CONFIRM
     echo "+ deploy: deploy with descriptors into cluster $CLUSTER"
     shift
 
-    kubectl apply -f $DESCRIPTORS/denyall-netpolicy.yaml $OPTS
-   
-    kubectl apply -f $DESCRIPTORS/redis-sa.yaml $OPTS
-    kubectl apply -f $DESCRIPTORS/redis-storageclass.yaml $OPTS
-    kubectl apply -f $DESCRIPTORS/redis-pvc.yaml $OPTS
     kubectl apply -f $DESCRIPTORS/redis-deployment.yaml $OPTS
     kubectl apply -f $DESCRIPTORS/redis-service.yaml $OPTS
 
-    kubectl apply -f $DESCRIPTORS/counter-sa.yaml $OPTS
     kubectl apply -f $DESCRIPTORS/counter-deployment.yaml $OPTS
-    kubectl apply -f $DESCRIPTORS/counter-hpa.yaml $OPTS 
-    kubectl apply -f $DESCRIPTORS/counter-pdb.yaml $OPTS
     kubectl apply -f $DESCRIPTORS/counter-service.yaml $OPTS
-
-    kubectl apply -f $DESCRIPTORS/redis-netpolicy.yaml $OPTS
-    kubectl apply -f $DESCRIPTORS/counter-netpolicy.yaml $OPTS
-    kubectl apply -f $DESCRIPTORS/egress-networkpolicy.yaml $OPTS
 
     echo "+ deploy: finished"
     ;;
@@ -94,44 +97,9 @@ CONFIRM
 
     kubectl delete -f $DESCRIPTORS/counter-service.yaml $OPTS
     kubectl delete -f $DESCRIPTORS/counter-deployment.yaml $OPTS
-    kubectl delete -f $DESCRIPTORS/counter-hpa.yaml $OPTS
-    kubectl delete -f $DESCRIPTORS/counter-pdb.yaml $OPTS
-    kubectl delete -f $DESCRIPTORS/counter-sa.yaml $OPTS
 
     kubectl delete -f $DESCRIPTORS/redis-deployment.yaml $OPTS
     kubectl delete -f $DESCRIPTORS/redis-service.yaml $OPTS
-    kubectl delete -f $DESCRIPTORS/redis-pvc.yaml $OPTS
-    kubectl delete -f $DESCRIPTORS/redis-storageclass.yaml $OPTS
-    kubectl delete -f $DESCRIPTORS/redis-sa.yaml $OPTS
-
-    kubectl delete -f $DESCRIPTORS/egress-networkpolicy.yaml $OPTS
-    kubectl delete -f $DESCRIPTORS/redis-netpolicy.yaml $OPTS
-    kubectl delete -f $DESCRIPTORS/counter-netpolicy.yaml $OPTS
-    kubectl delete -f $DESCRIPTORS/denyall-netpolicy.yaml $OPTS
-
-    echo "+ undeploy: finished"
-    ;;
-
-     --deploy-CLI)
-    echo "+ deploy: deploy with CLI into cluster $CLUSTER"
-    shift
-
-    kubectl create deployment counter-deployment --image eu.gcr.io/$PROJECT/hserver:latest $OPTS
-    kubectl scale deployment counter-deployment --replicas=3 $OPTS
-    kubectl autoscale deployment counter-deployment --min=3 --max=10 $OPTS
-    kubectl expose deployment counter-deployment --name counter-service --type "LoadBalancer"  --port=8080 --target-port=8080 $OPTS
-    kubectl label deployments counter-deployment app=counter env=test --overwrite $OPTS
-    kubectl label hpa counter-deployment app=counter env=test --overwrite $OPTS
-    kubectl label services counter-service app=counter env=test --overwrite $OPTS
-    
-    echo "+ deploy: finished"
-    ;;
-
-    --undeploy-CLI)
-    echo "+ undeploy: undeploy with CLI fom cluster $CLUSTER"
-    shift
-
-    kubectl delete deployments,pods,services,hpa -l app=counter,env=test $OPTS
 
     echo "+ undeploy: finished"
     ;;
@@ -173,16 +141,28 @@ CONFIRM
     --stop-test-internal)
     echo "+ delete test internal"
     shift
-    kubectl delete pods/counter-test $OPTS
+    kubectl delete deployment counter-test $OPTS
     echo "+ delete test internal: finished"
     ;;
 
     --start-test-internal)
     echo "+ start test internal"
     shift
-    kubectl create -f ./counter-test.yaml $OPTS
+    kubectl create -f ./descriptors/counter-test.yaml $OPTS
     sleep 5
-    kubectl logs -f counter-test -c test $OPTS
+    kubectl logs -l name=counter-test $OPTS
+    ;;
+
+    --start-operator)
+    echo "+ start local operator"
+    shift
+
+    cd counter-operator
+    kubectl apply -f deploy/crds/counter_v1alpha1_counterservice_crd.yaml $OPTS
+    kubectl apply -f deploy/crds/counter_v1alpha1_counterservice_cr.yaml $OPTS
+    operator-sdk up local $OPTS
+    cd -
+
     ;;
 
     *)    # unknown option

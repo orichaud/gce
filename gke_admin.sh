@@ -7,7 +7,7 @@ NS=orns
 
 OPTS=--namespace=$NS
 
-COUNT=5
+COUNT=3
 
 CLUSTER_USERNAME=admin
 CLUSTER_PASSWORD=admin1234adminfsdfoisfou

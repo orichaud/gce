@@ -1,7 +1,7 @@
 package apis
 
 import (
-	"github.com/gce/counter-operator/pkg/apis/counter/v1alpha1"
+	"gce/counter-operator/pkg/apis/counter/v1alpha1"
 )
 
 func init() {

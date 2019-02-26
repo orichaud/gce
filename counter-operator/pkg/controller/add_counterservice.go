@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/gce/counter-operator/pkg/controller/counterservice"
+	"gce/counter-operator/pkg/controller/counterservice"
 )
 
 func init() {

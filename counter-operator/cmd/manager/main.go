@@ -5,8 +5,9 @@ import (
 	"log"
 	"runtime"
 
-	"github.com/gce/counter-operator/pkg/apis"
-	"github.com/gce/counter-operator/pkg/controller"
+	"gce/counter-operator/pkg/apis"
+	"gce/counter-operator/pkg/controller"
+
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	sdkVersion "github.com/operator-framework/operator-sdk/version"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"

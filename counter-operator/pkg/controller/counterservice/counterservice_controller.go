@@ -5,7 +5,8 @@ import (
 	"io/ioutil"
 	"log"
 
-	counterv1alpha1 "github.com/gce/counter-operator/pkg/apis/counter/v1alpha1"
+	counterv1alpha1 "gce/counter-operator/pkg/apis/counter/v1alpha1"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"

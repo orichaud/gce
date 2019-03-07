@@ -1,10 +1,12 @@
+
 # A simple GKE step-by-step example
 
 ## Objective
 
-This is a simple tutorial including some advanced concepts like autoscaler and POD disruption budget for those wanting to start with Google Cloud and Kubernetes. It is based on a simple GO program. 
+This is a simple tutorial including some advanced concepts like autoscaler and POD disruption budget for those wanting to start with Google Cloud and Kubernetes. It is based on a simple GO program.
 
 2 deployments are defined:
+
 * `counter-deployment` spawns a single container running a go program with 2 URIs `/counter` (container lcoal counter) and `/redis` (global redis counter);
 * a `redis-deployment` that runs a single Redis instance. It will host a single global counter incremented by invoking the `/redis` URI.
 
@@ -13,7 +15,8 @@ You can simply clone this project and follow the instructions defined in this pa
 ## Prequisites
 
 We assume you have installed:
-* [GO](https://golang.org) 
+
+* [GO](https://golang.org)
 * [gcloud]( https://cloud.google.com/sdk/)
 * [kubectl]( https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 * [Docker](https://docs.docker.com/install/): In particular, a local registry must be run and it will be used to push images to Google Container Repository.
@@ -35,7 +38,7 @@ gcloud auth login
 
 You must have created a project. If not, please create a Google Cloud project with the Google Console. You can define the default project (you can refer to this [page](https://cloud.google.com/kubernetes-engine/docs/quickstart)):
 
-``` sh 
+``` sh
 gcloud config set project <myProject>
 ```
 
@@ -56,8 +59,8 @@ gcloud compute config-ssh
 ## Git
 
 In case you want to access and contribute:
-* [https://github.com/orichaud/gce.git](https://github.com/orichaud/gce.git)
 
+* [https://github.com/orichaud/gce.git](https://github.com/orichaud/gce.git)
 
 ## Creation of the GKE cluster
 
@@ -67,7 +70,7 @@ To deploy the cluster and perform operatiosn on the clusters, you will call the 
 ./gke_admin.sh --create-cluster
 ```
 
-The result is the creation of a GKE cluster belonging to your default project as defined previously. You can check the status of your cluster. Please note that starting from this point, your `kubectl` CLI will point to that cluster hosted in Google Cloud. 
+The result is the creation of a GKE cluster belonging to your default project as defined previously. You can check the status of your cluster. Please note that starting from this point, your `kubectl` CLI will point to that cluster hosted in Google Cloud.
 
 ``` sh
 kubectl cluster-info
@@ -217,6 +220,8 @@ Response: {"status":"OK","host":"counter-deployment-6984666dc4-52lsb","response"
 ...
 # done
 ```
+
 you will notice the 2 URIs invoked:
+
 * `/counter` invokes the atomic counter local to a POD.
 * `/redis` will access `kcount` variable managed by the Redis instance. This results in incrementing a global counter.

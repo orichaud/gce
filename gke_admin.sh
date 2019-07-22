@@ -160,7 +160,7 @@ CONFIRM
     cd counter-operator
     kubectl apply -f deploy/crds/counter_v1alpha1_counterservice_crd.yaml $OPTS
     kubectl apply -f deploy/crds/counter_v1alpha1_counterservice_cr.yaml $OPTS
-    operator-sdk up local $OPTS
+    GO111MODULE=on operator-sdk up local $OPTS
     cd -
 
     ;;

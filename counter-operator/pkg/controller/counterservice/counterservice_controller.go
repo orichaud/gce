@@ -2,8 +2,8 @@ package counterservice
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
-	"log"
 
 	counterv1alpha1 "gce/counter-operator/pkg/apis/counter/v1alpha1"
 
@@ -20,8 +20,16 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
+
+var log = logf.Log.WithName("controller_counterservice")
+
+/**
+* USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
+* business logic.  Delete these comments after modifying this file.*
+ */
 
 // Add creates a new CounterService Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -31,10 +39,7 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-
-	return &ReconcileCounterService{
-		client: mgr.GetClient(),
-		scheme: mgr.GetScheme()}
+	return &ReconcileCounterService{client: mgr.GetClient(), scheme: mgr.GetScheme()}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -64,6 +69,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return nil
 }
 
+// blank assignment to verify that ReconcileCounterService implements reconcile.Reconciler
 var _ reconcile.Reconciler = &ReconcileCounterService{}
 
 // ReconcileCounterService reconciles a CounterService object
@@ -94,11 +100,13 @@ var handlers = []*PackagedObjectHandler{
 	&PackagedObjectHandler{name: "redis", reconcileDeployment: reconcileRedisDeployment, reconcileService: reconcileServiceDefault}}
 
 func reconcileCounterDeployment(dep *appsv1.Deployment, rcontext *ReconcilerContext) error {
-	log.Printf("Reconciling Counter Deploymnet %s/%s\n", dep.Namespace, dep.Name)
+	reqLogger := log.WithValues("Request.Namespace", rcontext.request.Namespace, "Request.Name", rcontext.request.Name)
+
+	reqLogger.Info(fmt.Sprintf("Reconciling Counter Deployment %s/%s\n", dep.Namespace, dep.Name))
 
 	cs := rcontext.counterService
 	if *dep.Spec.Replicas != cs.Spec.Backends {
-		log.Printf("Counter deployment %s/%s: target backends=%d vs found replicas=%d", cs.Namespace, cs.Name, cs.Spec.Backends, *dep.Spec.Replicas)
+		reqLogger.Info(fmt.Sprintf("Counter deployment %s/%s: target backends=%d vs found replicas=%d", cs.Namespace, cs.Name, cs.Spec.Backends, *dep.Spec.Replicas))
 		*dep.Spec.Replicas = cs.Spec.Backends
 		err := rcontext.reconciler.client.Update(context.TODO(), dep)
 		if err != nil {
@@ -110,12 +118,14 @@ func reconcileCounterDeployment(dep *appsv1.Deployment, rcontext *ReconcilerCont
 }
 
 func reconcileServiceDefault(dep *corev1.Service, rcontext *ReconcilerContext) error {
-	log.Printf("Reconciling service %s/%s - default\n", dep.Namespace, dep.Name)
+	reqLogger := log.WithValues("Request.Namespace", rcontext.request.Namespace, "Request.Name", rcontext.request.Name)
+	reqLogger.Info(fmt.Sprintf("Reconciling service %s/%s - default\n", dep.Namespace, dep.Name))
 	return nil
 }
 
-func reconcileRedisDeployment(dep *appsv1.Deployment, context *ReconcilerContext) error {
-	log.Printf("Reconciling Redis Deployment %s/%s\n", dep.Namespace, dep.Name)
+func reconcileRedisDeployment(dep *appsv1.Deployment, rcontext *ReconcilerContext) error {
+	reqLogger := log.WithValues("Request.Namespace", rcontext.request.Namespace, "Request.Name", rcontext.request.Name)
+	reqLogger.Info(fmt.Sprintf("Reconciling Redis Deployment %s/%s\n", dep.Namespace, dep.Name))
 	return nil
 }
 
@@ -134,16 +144,20 @@ func newReconcilerContext(reconciler *ReconcileCounterService, request reconcile
 
 // Reconcile reads that state of the cluster for a CounterService object and makes changes based on the state read
 // and what is in the CounterService.Spec
+// TODO(user): Modify this Reconcile function to implement your Controller logic.  This example creates
+// a Pod as an example
+// Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *ReconcileCounterService) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	log.Printf("Reconciling CounterService %s/%s\n", request.Namespace, request.Name)
+	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
+	reqLogger.Info("Reconciling CounterService")
 
 	// Fetch the CounterService instance
 	context, err := newReconcilerContext(r, request)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Printf("%s/%s not found, exiting\n", request.Namespace, request.Name)
+			reqLogger.Info(fmt.Sprintf("%s/%s not found, exiting\n", request.Namespace, request.Name))
 			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
@@ -165,22 +179,24 @@ func (r *ReconcileCounterService) Reconcile(request reconcile.Request) (reconcil
 func (rcontext *ReconcilerContext) ProcessHandler(handler *PackagedObjectHandler) error {
 	cs := rcontext.counterService
 
+	reqLogger := log.WithValues("Request.Namespace", rcontext.request.Namespace, "Request.Name", rcontext.request.Name)
+
 	createOrRetrieve := func(name types.NamespacedName, found runtime.Object) error {
 		err := rcontext.reconciler.client.Get(context.TODO(), name, found)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				obj, err := loadDescriptor(name.Name, found)
+				obj, err := rcontext.loadDescriptor(name.Name, found)
 				if err != nil {
-					log.Printf("Cannot load descriptor %s/%s - %s\n", name.Namespace, name.Name, err.Error())
+					reqLogger.Error(err, "Cannot load descriptor\n")
 					return err
 				}
 				desc := obj.(metav1.Object)
 				desc.SetNamespace(cs.Namespace)
 				desc.SetLabels(cs.Labels)
 				err = rcontext.reconciler.client.Create(context.TODO(), obj)
-				log.Printf("Creating a new object %s/%s\n", name.Namespace, name.Name)
+				reqLogger.Info(fmt.Sprintf("Creating a new object %s/%s\n", name.Namespace, name.Name))
 				if err != nil {
-					log.Printf("Cannot create object %s/%s - %s\n", name.Namespace, name.Name, err.Error())
+					log.Error(err, fmt.Sprintf("Cannot create object %s/%s\n", name.Namespace, name.Name))
 					return err
 				}
 
@@ -189,17 +205,17 @@ func (rcontext *ReconcilerContext) ProcessHandler(handler *PackagedObjectHandler
 				}
 				err = rcontext.reconciler.client.Get(context.TODO(), name, found)
 				if err != nil {
-					log.Printf("Cannot retrieve object after creation %s/%s - %s\n", name.Namespace, name.Name, err.Error())
+					reqLogger.Error(err, fmt.Sprintf("Cannot retrieve object after creation %s/%s\n", name.Namespace, name.Name))
 					return err
 				}
 
 			} else {
-				log.Printf("Invalid error found: %s\n", err.Error())
+				reqLogger.Error(err, "Invalid error found\n")
 				return err
 			}
 		}
 		desc := found.(metav1.Object)
-		log.Printf("Found %T - %s/%s", found, desc.GetNamespace(), desc.GetName())
+		reqLogger.Info(fmt.Sprintf("Found %T - %s/%s", found, desc.GetNamespace(), desc.GetName()))
 
 		return nil
 	}
@@ -234,18 +250,20 @@ func (rcontext *ReconcilerContext) ProcessHandler(handler *PackagedObjectHandler
 	return nil
 }
 
-func loadDescriptor(key string, obj runtime.Object) (runtime.Object, error) {
+func (rcontext *ReconcilerContext) loadDescriptor(key string, obj runtime.Object) (runtime.Object, error) {
+	reqLogger := log.WithValues("Request.Namespace", rcontext.request.Namespace, "Request.Name", rcontext.request.Name)
+
 	filename := "../descriptors/" + key + ".yaml"
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
-		log.Fatalf("cannot read %s\n", filename)
+		reqLogger.Error(err, fmt.Sprintf("cannot read %s\n", filename))
 		return nil, err
 	}
 
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 	desc, _, err := decode([]byte(content), nil, nil)
 	if err != nil {
-		log.Fatalf("error decoding %s", filename)
+		reqLogger.Error(err, fmt.Sprintf("error decoding %s", filename))
 		return nil, err
 	}
 

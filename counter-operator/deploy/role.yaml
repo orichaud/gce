@@ -33,6 +33,26 @@ rules:
   - get
   - create
 - apiGroups:
+  - apps
+  resourceNames:
+  - counter-operator
+  resources:
+  - deployments/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
+  verbs:
+  - get
+- apiGroups:
   - counter.richaud.net
   resources:
   - '*'

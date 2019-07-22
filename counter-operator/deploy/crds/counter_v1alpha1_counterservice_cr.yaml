@@ -3,5 +3,5 @@ kind: CounterService
 metadata:
   name: counter-cr
 spec:
-    backends: 10
+    backends: 3
     
